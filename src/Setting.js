@@ -17,6 +17,12 @@ export function pieDataProcess(legendData, data) {
   }
   return res;
 }
+export function SetDuplicateRemoval(arr){
+  let set=new Set(arr);    
+  let res = [];
+  res=Array.from(set);
+  return res;
+}
 export function randomsfloorBetween(count) {
   let res = [];
   for (let i = 0; i < count; i++) {
@@ -24,13 +30,34 @@ export function randomsfloorBetween(count) {
   }
   return res;
 }
+//数据格式[[1,2,3,4],[5,6,7,8]]
 export function transpose2dArray(array) {
   if (array.length === 0) {
     return array;
   }
   return array[0].map((r, i) => array.map((c) => c[i]));
 }
-
+//数据格式[1，2，3，4，5，6，7，8，9]
+export function findall(nametext1,value){
+  let results=[],len=nametext1.length,pos=0;
+  while(pos<len){
+      pos=nametext1.indexOf(value,pos);
+      if(pos===-1)break;
+      results.push(pos);
+      pos=pos+1; 
+  }
+  return results;
+}
+//data是数据，value是每个维度下的对应数据的索引值
+//在data中寻找data中对应value索引的数值
+export function findvalue(data,value){
+  let results=[];
+  for (var i=0;i<value.length;i++){
+      let value_index=value[i];
+      results.push(data[value_index]);
+  }
+  return results;
+}
 export function wrapError(error) {
   return (
     <div style={{ fontSize: "x-large", color: "red" }}>

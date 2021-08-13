@@ -143,6 +143,9 @@ export function isChartTypeBarY(chart) {
 export function isChartTypePieBasic(chart){
   return chart.subType === "pie-basic"|| chart.subType==="pie-rose"|| chart.subType==="pie-ring";
 }
+export function isChartTypeBarTypical(chart){
+  return chart.subType === "bar-typical-y" || chart.subType ==="bar-typical-x";
+}
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -153,7 +156,9 @@ export function getChartOption(chart, data, isPdf) {
   let series = [];
   let isY = false;
   let isPie=false;
-
+  let nametext1=[];
+  let nametext2=[];
+  let index=[];
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
     isY = chart.subType === "bar-basic-y";
@@ -214,7 +219,47 @@ export function getChartOption(chart, data, isPdf) {
    if(chart.subType === "pie-ring"){
  series[0].radius=[50,140];
   }
-}
+}else if(isChartTypeBarTypical(chart)){
+  const options = chart.scopes.map(scope => getScopeLabel(scope));
+  isY = chart.subType === "bar-typical-y";
+  yData = options;
+  data = data.length !== 0 ? data.map(row => row[0]) : Setting.randomsBetween(0, 100, chart.scopes.length);
+  data = getDefaultData(chart, data);
+  yData = Setting.SetDuplicateRemoval(yData);
+  nametext1=chart.scopes.map(scope => getScopeId(scope));
+  nametext2=Setting.SetDuplicateRemoval(nametext1);
+  legendData=nametext2;
+  nametext2.forEach(value=>{
+  index=Setting.findall(nametext1,value);
+  var namedata=Setting.findvalue(data,index);
+  series.push(
+     {
+       name:value,
+       type:'bar',
+       barGap: 0,
+       label: {
+        show: true,
+        position: isY? "top" : "right",
+        // formatter: '{c}%',
+        formatter: function(params) {
+          // return `${params.value}`;
+          if (params.value < 0) {
+            return "你在本题上没有作答";
+          } else if (params.value === 0) {
+            return "贵校在该题上缺乏有效数据";
+          }
+          return toFixed(params.value);
+        },
+        color: "#000000",
+      },
+      emphasis: {
+              focus: 'series'
+          },
+    data:namedata
+     }
+   )
+    })
+ }
   else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -223,7 +268,6 @@ export function getChartOption(chart, data, isPdf) {
     const markPoints = isY ? getMarkPointsForBarFullY(chart, data) : getMarkPointsForBarFullX(chart, data);
     data = getDefaultData(chart, data);
     data = get100Times(data);
-
     if (chart.subType === "bar-full-x" && scopes.length !== 0) {
       const ranges = scopes.map(scope => scope.range);
       const uniqueRanges = ranges.filter((range, i) => {
@@ -355,6 +399,15 @@ export function getChartOption(chart, data, isPdf) {
       //   return result;
       // }
     },
+    toolbox: {
+      show: true,
+      feature: {
+          mark: {show: true},
+          dataView: {show: true, readOnly: false},
+          restore: {show: true},
+          saveAsImage: {show: true}
+      }
+  },
     // legend: {
     //   data: legendData,
     //   // top: "10%",
@@ -365,9 +418,9 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient:!isChartTypePieBasic(chart)? "horizontal":"vertical",
-      x: !isChartTypePieBasic(chart)? "center":"right",
-      y: !isChartTypePieBasic(chart)? "bottom":"center",
+      orient:!(isChartTypePieBasic(chart)||isChartTypePieBasic(chart))? "horizontal":"vertical",
+      x: !(isChartTypePieBasic(chart)||isChartTypePieBasic(chart))? "center":"right",
+      y: !(isChartTypePieBasic(chart)||isChartTypePieBasic(chart))? "bottom":"center",
     },
     xAxis: {
       name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
