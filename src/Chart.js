@@ -146,6 +146,9 @@ export function isChartTypePieBasic(chart){
 export function isChartTypeBarTypical(chart){
   return chart.subType === "bar-typical-y" || chart.subType ==="bar-typical-x";
 }
+export function isChartTypeRadar(chart) {
+  return chart.subType==="radar-basic";
+}
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -156,9 +159,13 @@ export function getChartOption(chart, data, isPdf) {
   let series = [];
   let isY = false;
   let isPie=false;
+  let isradar=false;
   let nametext1=[];
   let nametext2=[];
   let index=[];
+  let radardata = [];
+  let indicatorData;
+  let indicatorname
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
     isY = chart.subType === "bar-basic-y";
@@ -219,7 +226,33 @@ export function getChartOption(chart, data, isPdf) {
    if(chart.subType === "pie-ring"){
  series[0].radius=[50,140];
   }
-}else if(isChartTypeBarTypical(chart)){
+}else if(isChartTypeRadar(chart)){
+    const options = chart.scopes.map(scope => getScopeLabel(scope));
+    isradar = chart.subType === "radar-basic";//数值轴是y轴，isY=true
+    indicatorname = options;
+    indicatorname=Setting.SetDuplicateRemoval(indicatorname);
+    data = data.length !== 0 ? data.map(row => row[0]) : Setting.randomsBetween(0, 100, chart.scopes.length);
+    //ranges是雷达图的角点
+    nametext1=chart.scopes.map(scope => getScopeId(scope));
+    nametext2=Setting.SetDuplicateRemoval(nametext1);
+    legendData=nametext2;//雷达图的维度
+    indicatorData=Setting.getindicatorData(indicatorname);
+    legendData.forEach(value=>{
+      index=Setting.findall(nametext1,value);
+      var namedata=Setting.findvalue(data,index);
+    radardata.push(
+      {
+        value:namedata,
+        name:value,
+      }
+    );
+    series.push({
+      type:"radar",
+      data:radardata,
+    })
+  })
+ }
+else if(isChartTypeBarTypical(chart)){
   const options = chart.scopes.map(scope => getScopeLabel(scope));
   isY = chart.subType === "bar-typical-y";
   yData = options;
@@ -421,10 +454,11 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient:!(isChartTypePieBasic(chart)||isChartTypeBarTypical(chart))? "horizontal":"vertical",
-      x: !(isChartTypePieBasic(chart)||isChartTypeBarTypical(chart))? "center":"right",
-      y: !(isChartTypePieBasic(chart)||isChartTypeBarTypical(chart))? "bottom":"center",
+      orient:!(isChartTypePieBasic(chart)||isChartTypeBarTypical(chart)||isChartTypeRadar(chart))? "horizontal":"vertical",
+      x: !(isChartTypePieBasic(chart)||isChartTypeBarTypical(chart)||isChartTypeRadar(chart))? "center":"right",
+      y: !(isChartTypePieBasic(chart)||isChartTypeBarTypical(chart)||isChartTypeRadar(chart))? "bottom":"center",
     },
+    radar:!isChartTypeRadar(chart)?null: {indicator:indicatorData},
     xAxis: {
       name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
       nameLocation: "middle",
@@ -487,6 +521,9 @@ export function getChartOption(chart, data, isPdf) {
   if (isY) {
     [option.xAxis, option.yAxis] = [option.yAxis, option.xAxis];
   }else if(isPie){
+    delete option.xAxis;
+    delete option.yAxis;
+  }else if(isradar){
     delete option.xAxis;
     delete option.yAxis;
   };

@@ -2,7 +2,13 @@
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
+export function getindicatorData(indicatorname){
+  let res = [];
+  indicatorname.forEach(value => {
+      res.push({name: value,max:100});
+  });
+  return res;
+}
 export function randomsBetween(min, max, count) {
     let res = [];
     for (let i = 0; i < count; i ++) {
