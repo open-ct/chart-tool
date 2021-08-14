@@ -140,6 +140,9 @@ export function isChartTypeBarFull(chart) {
 export function isChartTypeBarY(chart) {
   return chart.subType === "bar-basic-y" || chart.subType === "bar-full-y";
 }
+export function isChartTypePieBasic(chart){
+  return chart.subType === "pie-basic"|| chart.subType==="pie-rose"|| chart.subType==="pie-ring";
+}
 
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
@@ -150,7 +153,7 @@ export function getChartOption(chart, data, isPdf) {
   let legendData = [];
   let series = [];
   let isY = false;
-
+  let isPie=false;
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
     isY = chart.subType === "bar-basic-y";
@@ -180,7 +183,38 @@ export function getChartOption(chart, data, isPdf) {
         data: data,
       }
     );
-  } else if (isChartTypeBarFull(chart)) {
+  } else if (isChartTypePieBasic(chart)) {
+    const options = chart.scopes.map(scope => getScopeLabel(scope));
+    isPie = chart.subType === "pie-basic";//数值轴是y轴，isY=true
+    legendData = options;
+    data = data.length !== 0 ? data.map(row => row[0]) : Setting.randomsfloorBetween(chart.scopes.length);
+    data=  Setting.pieDataProcess(legendData,data);
+    series.push(
+      {
+        name: '百分比',
+        type: 'pie',
+        radius: '50%',
+        label: {
+          formatter: function(params) {
+            // return `${params.value}`;
+            if (params.value < 0) {
+              return "你在本题上没有作答";
+            } else if (params.value === 0) {
+              return "贵校在该题上缺乏有效数据";
+            }
+            return toFixed(params.value);
+          },
+        },
+        data: data,
+      }
+    );
+    if(chart.subType === "pie-rose"){
+    series[0].roseType="radius";
+  }
+   if(chart.subType === "pie-ring"){
+ series[0].radius=[50,140];
+  }
+}else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
     const dummyData = isY ? [[0.38,0.62],[0.32,0.68]] : [[0,0,0,1,0],[0,0,0,1,0],[1,0,0],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693]];
@@ -320,6 +354,15 @@ export function getChartOption(chart, data, isPdf) {
       //   return result;
       // }
     },
+     toolbox: {
+      show: true,
+      feature: {
+          mark: {show: true},
+          dataView: {show: true, readOnly: false},
+          restore: {show: true},
+          saveAsImage: {show: true}
+      }
+  },
     // legend: {
     //   data: legendData,
     //   // top: "10%",
@@ -330,9 +373,9 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: "horizontal",
-      x: "center",
-      y: "bottom",
+      orient:!(isChartTypePieBasic(chart))? "horizontal":"vertical",
+      x: !(isChartTypePieBasic(chart))? "center":"right",
+      y: !(isChartTypePieBasic(chart))? "bottom":"center",
     },
     xAxis: {
       name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
@@ -395,7 +438,10 @@ export function getChartOption(chart, data, isPdf) {
 
   if (isY) {
     [option.xAxis, option.yAxis] = [option.yAxis, option.xAxis];
-  }
+  }else if(isPie){
+    delete option.xAxis;
+    delete option.yAxis;
+  };
   return option;
 }
 

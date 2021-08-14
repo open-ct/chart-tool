@@ -12,8 +12,8 @@ const chart = {
     "owner": "xtzx_dg",
     "name": "你在“自主学习力”维度的得分：",
     "createdTime": "2021-01-02T22:01:25+08:00",
-    "type": "bar",
-    "subType": "bar-basic-y",
+    "type": "pie",
+    "subType": "pie-basic",
     "title": "",
     "scopes": [
         {
