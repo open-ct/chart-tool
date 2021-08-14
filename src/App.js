@@ -19,29 +19,99 @@ const chart = {
         {
             "id": 0,
             "type": "默认",
-            "range": "父母参与子女学习多",
-            "text": "四年级",
+            "range": "0",
+            "text": "本区",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "父母参与子女学习多",
-            "text": "八年级",
+            "range": "0",
+            "text": "株洲区",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "1",
+            "text": "本区",
             "askId": 395
         },
          {
             "id": 0,
             "type": "默认",
-            "range": "父母参与子女学习少",
-            "text": "四年级",
+            "range": "1",
+            "text": "株洲区",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "2",
+            "text": "本区",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "父母参与子女学习少",
-            "text": "八年级",
+            "range": "2",
+            "text": "株洲区",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "3",
+            "text": "本区",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "3",
+            "text": "株洲区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "4",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "4",
+            "text": "株洲区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "5",
+            "text": "本区",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "5",
+            "text": "株洲区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "6",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "6",
+            "text": "株洲区",
             "askId": 395
         },
     ],
