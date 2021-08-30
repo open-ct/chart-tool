@@ -10,7 +10,13 @@ export function randomsBetween(min, max, count) {
     }
     return res;
 }
-
+export function randomsfloorBetween(count){
+    let res = [];
+    for (let i=0;i<count;i++){
+        res.push(Math.random())
+    }
+    return res;
+}
 export function transpose2dArray(array) {
     if (array.length === 0) {
         return array;

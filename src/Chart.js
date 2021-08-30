@@ -9,7 +9,15 @@ function getScopeId(scope) {
 function getScopeId2(scope) {
   return `${scope.text} - ${scope.type}`;
 }
-
+//一维随机数组的饼状图数据处理，后续拿到实际数据再更改
+function pieDataProcess(legendData,data) {
+  let res=[];
+   for(var i=0;i<legendData.length;i++){
+     var item={value:data[i],name:legendData[i]};
+     res.push(item);
+   }
+   return res
+ }
 function getMarkPointsForBarFullY(chart, data) {
   let markPoints = [];
   chart.scopes.forEach((scope, i) => {
@@ -140,6 +148,9 @@ export function isChartTypeBarFull(chart) {
 export function isChartTypeBarY(chart) {
   return chart.subType === "bar-basic-y" || chart.subType === "bar-full-y";
 }
+export function isChartTypePieBasic(chart) {
+  return chart.subType === "pie-basic";
+}
 
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
@@ -150,8 +161,33 @@ export function getChartOption(chart, data, isPdf) {
   let legendData = [];
   let series = [];
   let isY = false;
-
-  if (isChartTypeBarBasic(chart)) {
+  let ispie = false;
+if (isChartTypePieBasic(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    ispie = chart.subType === "pie-basic"; //数值轴是y轴，isY=true
+    legendData = options;
+    data =data.length !== 0? data.map((row) => row[0]): Setting.randomsfloorBetween(chart.scopes.length);
+    data = pieDataProcess(legendData, data);
+    series.push({
+      name: "百分比",
+      type: "pie",
+      radius: "70%",
+      label: {
+        show: true,
+        position:'inside',
+        formatter: function (params) {
+          // return `${params.value}`;
+          if (params.value < 0) {
+            return "你在本题上没有作答";
+          } else if (params.value === 0) {
+            return "贵校在该题上缺乏有效数据";
+          }
+          return toPercent(params.value*100) + "%";
+        },
+      },
+      data: data,
+    });
+  } else if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
     isY = chart.subType === "bar-basic-y";
     yData = options;
@@ -330,9 +366,9 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: "horizontal",
-      x: "center",
-      y: "bottom",
+      orient: isChartTypeBarBasic(chart)?"horizontal":isChartTypePieBasic(chart)?"vertical":"horizontal",
+      x:  isChartTypeBarBasic(chart)?"center":isChartTypePieBasic(chart)?"right":"center",
+      y:  isChartTypeBarBasic(chart)?"bottom":isChartTypePieBasic(chart)?"center":"bottom",
     },
     xAxis: {
       name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
@@ -395,6 +431,9 @@ export function getChartOption(chart, data, isPdf) {
 
   if (isY) {
     [option.xAxis, option.yAxis] = [option.yAxis, option.xAxis];
+  } else if (ispie) {
+    delete option.xAxis;
+    delete option.yAxis;
   }
   return option;
 }
