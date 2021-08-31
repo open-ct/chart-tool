@@ -1,7 +1,7 @@
 import React from "react";
 import ReactEcharts from 'echarts-for-react';
 import * as Setting from "./Setting";
-
+import * as dataTool from "../node_modules/echarts/dist/extension/dataTool.js"
 function getScopeId(scope) {
   return scope.text;
 }
@@ -140,7 +140,9 @@ export function isChartTypeBarFull(chart) {
 export function isChartTypeBarY(chart) {
   return chart.subType === "bar-basic-y" || chart.subType === "bar-full-y";
 }
-
+export function isChartTypeBoxplot(chart) {
+  return chart.subType === "boxplot-basic-y";
+}
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -150,6 +152,7 @@ export function getChartOption(chart, data, isPdf) {
   let legendData = [];
   let series = [];
   let isY = false;
+  let dataset=[];
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -180,7 +183,43 @@ export function getChartOption(chart, data, isPdf) {
         data: data,
       }
     );
-  } else if (isChartTypeBarFull(chart)) {
+  } else if (isChartTypeBoxplot(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    isY = chart.subType === "boxplot-basic-y";
+    yData = options;
+    //随机生成二维数组，二维数组长度为scope的长度
+    data =
+      data.length !== 0
+        ? data.map((row) => row[0])
+        : Setting.random2dArrayBetween(100, 500, chart.scopes.length);
+    data = getDefaultData(chart, data);
+    data = dataTool.prepareBoxplotData(data);
+    console.log(data);
+    data.boxData.forEach((value,i) =>{
+    let sum = value[value.length - 1]-value[0];
+    let percent= ((value[2]-value[0])/sum).toFixed(2);
+    dataset.push({
+      value: value,
+      itemStyle:{
+        color: {
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [{
+              offset: 1-percent, color: 'red' // 0% 处的颜色
+          }, {
+              offset: 1-percent, color: 'blue' // 100% 处的颜色
+        }]
+        }},
+    });
+  })
+      series.push({
+      type: "boxplot",
+      data: dataset,
+        })
+  }else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
     const dummyData = isY ? [[0.38,0.62],[0.32,0.68]] : [[0,0,0,1,0],[0,0,0,1,0],[1,0,0],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693]];
@@ -335,19 +374,23 @@ export function getChartOption(chart, data, isPdf) {
       y: "bottom",
     },
     xAxis: {
-      name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
+      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n"):isChartTypeBoxplot(chart)?"分\n数":null,
       nameLocation: "middle",
       nameRotate: 0,
       nameGap: 50,
       axisLine: {
-        show: false,
+        show: true,
+        lineStyle:{
+          width:1,
+        }
       },
       axisLabel: {
+        show: true,
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' :isChartTypeBoxplot(chart)?'{value}':'{value}%',
       },
       axisTick: {
-        show: false,
+        show: true,
       },
       splitLine: {
         show: chart.subType === "bar-full-y" ? false : true,
@@ -355,13 +398,13 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBoxplot(chart)?null:0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBoxplot(chart)?null:100,
+      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBoxplot(chart)?50:10,
     },
     yAxis: [{
       data: yData,
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart)? (chart.order === "down-right"):(chart.order !== "down-right"),
       axisLabel: {
         show: true,
         fontSize: fontSize,
@@ -373,11 +416,11 @@ export function getChartOption(chart, data, isPdf) {
       axisLine: {
         show: true,
         lineStyle: {
-          color: "rgb(217,217,217)",
+          width:1,
         }
       },
       axisTick: {
-        show: false,
+        show: true,
       }
     }].concat(yAxisNew),
     // animation: !isPdf,

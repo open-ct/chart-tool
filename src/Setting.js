@@ -10,7 +10,13 @@ export function randomsBetween(min, max, count) {
     }
     return res;
 }
-
+export function random2dArrayBetween(min,max,count) {   
+    let res = [];
+    for (let i = 0; i < count; i ++) {
+        res.push(randomsBetween(min,max,10));
+    }
+    return res;
+}
 export function transpose2dArray(array) {
     if (array.length === 0) {
         return array;
