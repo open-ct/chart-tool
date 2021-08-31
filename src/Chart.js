@@ -10,6 +10,33 @@ function getScopeId2(scope) {
   return `${scope.text} - ${scope.type}`;
 }
 
+function SetDuplicateRemoval(arr){
+    let set=new Set(arr);    
+    let res = [];
+    res=Array.from(set);
+    return res;
+}
+function findall(nametext1,value){
+    let results=[],len=nametext1.length,pos=0;
+    while(pos<len){
+        pos=nametext1.indexOf(value,pos);
+        if(pos===-1)break;
+        results.push(pos);
+        pos=pos+1; 
+    }
+    return results;
+}
+/* data是数据，value是每个维度下的对应数据的索引值,在data中寻找data中对应value索引的数值
+将各种多维数据处理成可以直接使用的data
+ */
+function findvalue(data,value){
+    let results=[];
+    for (var i=0;i<value.length;i++){
+        let value_index=value[i];
+        results.push(data[value_index]);
+    }
+    return results;
+}
 function getMarkPointsForBarFullY(chart, data) {
   let markPoints = [];
   chart.scopes.forEach((scope, i) => {
@@ -140,7 +167,9 @@ export function isChartTypeBarFull(chart) {
 export function isChartTypeBarY(chart) {
   return chart.subType === "bar-basic-y" || chart.subType === "bar-full-y";
 }
-
+export function isChartTypeBarLong(chart) {
+  return chart.subType === "bar-Long-y";
+}
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -150,7 +179,9 @@ export function getChartOption(chart, data, isPdf) {
   let legendData = [];
   let series = [];
   let isY = false;
-
+  let nametext1 = [];
+  let nametext2 = [];
+  let index = [];
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
     isY = chart.subType === "bar-basic-y";
@@ -180,6 +211,44 @@ export function getChartOption(chart, data, isPdf) {
         data: data,
       }
     );
+  }else if (isChartTypeBarLong(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    isY = chart.subType === "bar-Long-y";
+    yData = options; 
+    //data随机生成数据在这边，由于data=[]传进来的，所以执行Setting.randomBetween
+    //默认典型直方图的数据格式是[x,y,z,m,n]
+    //要求用户在同一类目下按顺序输入完所有要添加的维度数据，不准类目数据交叉
+    data =data.length !== 0 ? data.map((row) => row[0]): Setting.randomsBetween(0, 100, chart.scopes.length);
+    data = getDefaultData(chart, data);
+    yData = SetDuplicateRemoval(yData);
+    nametext1 = chart.scopes.map((scope) => getScopeId(scope));
+    nametext2 = SetDuplicateRemoval(nametext1);
+    legendData = nametext2;
+    nametext2.forEach((value) => {
+      index = findall(nametext1, value);
+      var namedata = findvalue(data, index);
+      series.push({
+        name: value,
+        type: "bar",
+        barGap: 0,
+        label: {
+          show: true,
+          position: isY ? "top" : "right",
+          // formatter: '{c}%',
+          formatter: function (params) {
+            // return `${params.value}`;
+            if (params.value < 0) {
+              return "你在本题上没有作答";
+            } else if (params.value === 0) {
+              return "贵校在该题上缺乏有效数据";
+            }
+            return toFixed(params.value);
+          },
+          color: "#000000",
+        },
+        data: namedata,
+      });
+    });
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -289,7 +358,7 @@ export function getChartOption(chart, data, isPdf) {
     color: chart.barColors,
     grid: {
       // top: "30%",
-      right: isChartTypeBarFull(chart) ? "5%" : "5%",
+      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarLong(chart)?"10%":"5%",
       containLabel: true,
       top: chart.title !== "" ? 60 : 30,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : 40,
@@ -330,21 +399,25 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: "horizontal",
-      x: "center",
-      y: "bottom",
-    },
+      orient: isChartTypeBarLong(chart)?"vertical":"horizontal",
+      x: isChartTypeBarLong(chart)?"right":"center",
+      y: isChartTypeBarLong(chart)?"center":"bottom",
+     },
     xAxis: {
-      name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
+      name: isChartTypeBarBasic(chart)? chart.scopes[0].text.split("").join("\n\n"):isChartTypeBarLong(chart)?"百\n分\n比\n(\n%\n)":null,
       nameLocation: "middle",
       nameRotate: 0,
-      nameGap: 50,
+      nameGap: 50, 
       axisLine: {
-        show: false,
+        show: true,
+        lineStyle: {
+          color:"rgb(217,217,217)",
+          width:1,
+        }
       },
       axisLabel: {
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' :isChartTypeBarLong(chart)? '{value}':'{value}%',
       },
       axisTick: {
         show: false,
@@ -355,9 +428,9 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 :isChartTypeBarLong(chart)? 0:0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarLong(chart)? 100:100,
+      interval: isChartTypeBarBasic(chart) ? 1 :isChartTypeBarLong(chart)?20:10,
     },
     yAxis: [{
       data: yData,
@@ -373,11 +446,16 @@ export function getChartOption(chart, data, isPdf) {
       axisLine: {
         show: true,
         lineStyle: {
-          color: "rgb(217,217,217)",
+          color:"rgb(217,217,217)",
+          width:1,
         }
       },
       axisTick: {
         show: false,
+        lineStyle: {
+          color:"rgb(217,217,217)",
+          width:1,
+        }
       }
     }].concat(yAxisNew),
     // animation: !isPdf,
