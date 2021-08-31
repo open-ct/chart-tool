@@ -12,32 +12,81 @@ const chart = {
     "owner": "xtzx_dg",
     "name": "你在“自主学习力”维度的得分：",
     "createdTime": "2021-01-02T22:01:25+08:00",
-    "type": "bar",
-    "subType": "bar-basic-y",
+    "type": "pie",
+    "subType": "compositepie",
     "title": "",
-    "scopes": [
+    "scopes":  [
         {
             "id": 0,
             "type": "默认",
-            "range": "个人",
-            "text": "自主学习力",
+            "range": "不知道",
+            "text": "百分比",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "全校",
-            "text": "自主学习力",
+            "range": "无工作",
+            "text": "百分比",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "全市",
-            "text": "自主学习力",
+            "range": "政府机构的高级行政人员",
+            "text": "百分比",
             "askId": 395
-        }
-    ],
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "企业管理人员",
+            "text": "百分比",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "教育、医务、科研人员、专业技术人员",
+            "text": "百分比",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "政府普通工作人员",
+            "text": "百分比",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "商业服务业人员",
+            "text": "百分比",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "私营或个体经营者",
+            "text": "百分比",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "工人",
+            "text": "百分比",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "农民，一直在农村种地或做其他事情",
+            "text": "百分比",
+            "askId": 395
+        },
+        ],
     "options": [],
     "width": 750,
     "height": 300,
