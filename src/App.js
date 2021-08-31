@@ -12,31 +12,178 @@ const chart = {
     "owner": "xtzx_dg",
     "name": "你在“自主学习力”维度的得分：",
     "createdTime": "2021-01-02T22:01:25+08:00",
-    "type": "bar",
-    "subType": "bar-basic-y",
+    "type": "radar",
+    "subType": "radar-basic",
     "title": "",
     "scopes": [
         {
             "id": 0,
             "type": "默认",
-            "range": "个人",
-            "text": "自主学习力",
+            "range": "品德素养",
+            "text": "四年级",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "全校",
-            "text": "自主学习力",
+            "range": "品德素养",
+            "text": "八年级",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "全市",
-            "text": "自主学习力",
+            "range": "品德素养",
+            "text": "十一年级",
             "askId": 395
-        }
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "生活素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "生活素养",
+            "text": "八年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "生活素养",
+            "text": "十一年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "身心素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "身心素养",
+            "text": "八年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "身心素养",
+            "text": "十一年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "学习素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "学习素养",
+            "text": "八年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "学习素养",
+            "text": "十一年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "创新素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "创新素养",
+            "text": "八年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "创新素养",
+            "text": "十一年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "国际素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "国际素养",
+            "text": "八年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "国际素养",
+            "text": "十一年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "审美素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "审美素养",
+            "text": "",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "审美素养",
+            "text": "十一年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "信息素养",
+            "text": "四年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "信息素养",
+            "text": "八年级",
+            "askId": 395
+        },
+        {
+            "id": 0,
+            "type": "默认",
+            "range": "信息素养",
+            "text": "十一年级",
+            "askId": 395
+        },
     ],
     "options": [],
     "width": 750,

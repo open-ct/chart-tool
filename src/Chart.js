@@ -120,7 +120,40 @@ function getMaxScopeLength(chart, fontSize) {
   });
   return res * fontSize + 50;
 }
-
+function SetDuplicateRemoval(arr){
+    let set=new Set(arr);    
+    let res = [];
+    res=Array.from(set);
+    return res;
+}
+function getindicatorData(indicatorname){
+  let res = [];
+  indicatorname.forEach(value => {
+      res.push({name: value,max:100});
+  });
+  res[0].axisLabel={show:true};
+  return res;
+}
+function findall(nametext1,value){
+    let results=[],len=nametext1.length,pos=0;
+    while(pos<len){
+        pos=nametext1.indexOf(value,pos);
+        if(pos===-1)break;
+        results.push(pos);
+        pos=pos+1; 
+    }
+    return results;
+}
+//data是数据，value是每个维度下的对应数据的索引值
+//在data中寻找data中对应value索引的数值
+function findvalue(data,value){
+    let results=[];
+    for (var i=0;i<value.length;i++){
+        let value_index=value[i];
+        results.push(data[value_index]);
+    }
+    return results;
+}
 function toFixed(value) {
   return `${(Math.round(value * 10) / 10).toFixed(1)}`;
 }
@@ -140,7 +173,9 @@ export function isChartTypeBarFull(chart) {
 export function isChartTypeBarY(chart) {
   return chart.subType === "bar-basic-y" || chart.subType === "bar-full-y";
 }
-
+export function isChartTypeRadar(chart) {
+  return chart.subType === "radar-basic";
+}
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -150,6 +185,13 @@ export function getChartOption(chart, data, isPdf) {
   let legendData = [];
   let series = [];
   let isY = false;
+  let isradar = false;
+  let nametext1 = [];
+  let nametext2 = [];
+  let index = [];
+  let radardata = [];
+  let indicatorData;
+  let indicatorname;
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -180,6 +222,29 @@ export function getChartOption(chart, data, isPdf) {
         data: data,
       }
     );
+  } else if (isChartTypeRadar(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    isradar = chart.subType === "radar-basic"; 
+    indicatorname = options;
+    indicatorname = SetDuplicateRemoval(indicatorname);
+    data =data.length !== 0? data.map((row) => row[0]): Setting.randomsBetween(0, 100, chart.scopes.length);
+    //ranges是雷达图的角点
+    nametext1 = chart.scopes.map((scope) => getScopeId(scope));
+    nametext2 = SetDuplicateRemoval(nametext1);
+    legendData = nametext2; //雷达图的维度
+    indicatorData = getindicatorData(indicatorname);
+    legendData.forEach((value) => {
+      index = findall(nametext1, value);
+      var namedata = findvalue(data, index);
+      radardata.push({
+        value: namedata,
+        name: value,
+      });
+      series.push({
+        type: "radar",
+        data: radardata,
+      });
+    });
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -330,9 +395,12 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: "horizontal",
-      x: "center",
-      y: "bottom",
+      orient:isChartTypeRadar(chart) ?"vertical": "horizontal",
+      x: isChartTypeRadar(chart) ?"right":"center",
+      y: isChartTypeRadar(chart) ?"center":"bottom",
+    },
+    radar: !isChartTypeRadar(chart) ? null : { 
+      indicator: indicatorData,
     },
     xAxis: {
       name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
@@ -395,6 +463,9 @@ export function getChartOption(chart, data, isPdf) {
 
   if (isY) {
     [option.xAxis, option.yAxis] = [option.yAxis, option.xAxis];
+  }else if (isradar) {
+    delete option.xAxis;
+    delete option.yAxis;
   }
   return option;
 }
