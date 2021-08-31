@@ -13,30 +13,107 @@ const chart = {
     "name": "你在“自主学习力”维度的得分：",
     "createdTime": "2021-01-02T22:01:25+08:00",
     "type": "bar",
-    "subType": "bar-basic-y",
+    "subType": "bar-typical-y",
     "title": "",
     "scopes": [
         {
             "id": 0,
             "type": "默认",
-            "range": "个人",
-            "text": "自主学习力",
+            "range": "0",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "0",
+            "text": "株洲市",
             "askId": 395
         },
         {
             "id": 0,
             "type": "默认",
-            "range": "全校",
-            "text": "自主学习力",
+            "range": "1",
+            "text": "本区",
             "askId": 395
         },
-        {
+          {
             "id": 0,
             "type": "默认",
-            "range": "全市",
-            "text": "自主学习力",
+            "range": "1",
+            "text": "株洲市",
             "askId": 395
-        }
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "2",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "2",
+            "text": "株洲市",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "3",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "3",
+            "text": "株洲市",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "4",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "4",
+            "text": "株洲市",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "5",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "5",
+            "text": "株洲市",
+            "askId": 395
+        },
+         {
+            "id": 0,
+            "type": "默认",
+            "range": "6",
+            "text": "本区",
+            "askId": 395
+        },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "6",
+            "text": "株洲市",
+            "askId": 395
+        },
     ],
     "options": [],
     "width": 750,
