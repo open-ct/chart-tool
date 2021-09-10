@@ -1,13 +1,23 @@
 import React from "react";
 import ReactEcharts from 'echarts-for-react';
 import * as Setting from "./Setting";
-
+import { Select } from 'antd';
+const { Option } = Select;
 function getScopeId(scope) {
   return scope.text;
 }
 
 function getScopeId2(scope) {
   return `${scope.text} - ${scope.type}`;
+}
+
+function PieDataProcess(legendData, data) {
+  let res = [];
+  for (var i = 0; i < legendData.length; i++) {
+    var item = { value: data[i], name: legendData[i] };
+    res.push(item);
+  }
+  return res
 }
 
 function getMarkPointsForBarFullY(chart, data) {
@@ -56,14 +66,14 @@ function getMarkPointsForBarFullX(chart, data) {
         const dataRow = data[i];
         const x = dataRow.slice(0, optionIndex).reduce((sum, current) => sum + current, 0) + dataRow[optionIndex] / 2;
         markPoints.push({
-            name: `我 - ${getScopeId2(scope)}`,
-            value: "我",
-            xAxis: x * 100,
-            yAxis: index,
+          name: `我 - ${getScopeId2(scope)}`,
+          value: "我",
+          xAxis: x * 100,
+          yAxis: index,
           symbolOffset: [0, -10],
           tooltip: {
-              show: false,
-            },
+            show: false,
+          },
         });
       }
       index += 1;
@@ -141,6 +151,10 @@ export function isChartTypeBarY(chart) {
   return chart.subType === "bar-basic-y" || chart.subType === "bar-full-y";
 }
 
+export function isChartTypePieBasic(chart) {
+  return chart.subType === "pie-basic-simple";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -150,6 +164,7 @@ export function getChartOption(chart, data, isPdf) {
   let legendData = [];
   let series = [];
   let isY = false;
+  let ispie = false;
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -166,7 +181,7 @@ export function getChartOption(chart, data, isPdf) {
           show: true,
           position: isY ? "top" : "right",
           // formatter: '{c}%',
-          formatter: function(params) {
+          formatter: function (params) {
             // return `${params.value}`;
             if (params.value < 0) {
               return "你在本题上没有作答";
@@ -180,10 +195,40 @@ export function getChartOption(chart, data, isPdf) {
         data: data,
       }
     );
+  } else if (isChartTypePieBasic(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    ispie = chart.subType === "pie-basic-simple";
+    legendData = options;
+    data = data.length !== 0 ? data.map((row) => row[0]) : [[0.03], [0.2994], [0.32845], [0.2001], [0.083314], [0.060899]].map((row) => row[0]);
+    data = getDefaultData(chart, data);
+    data = PieDataProcess(legendData, data);
+    series.push({
+      name: "百分比",
+      type: "pie",
+      radius: "90%",
+      colorBy: 'data',
+      label: {
+        show: true,
+        position: 'inside',
+        avoidLabelOverlap: true,
+        fontSize: 12,
+        minShowLabelAngle: 5,
+        formatter: function (params) {
+          if (params.value < 0) {
+            return "你在本题上没有作答";
+          } else if (params.value === 0) {
+            return "贵校在该题上缺乏有效数据";
+          }
+          return toFixed(params.value * 100) + "%";
+        },
+        color: "#000000",
+      },
+      data: data,
+    });
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
-    const dummyData = isY ? [[0.38,0.62],[0.32,0.68]] : [[0,0,0,1,0],[0,0,0,1,0],[1,0,0],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693]];
+    const dummyData = isY ? [[0.38, 0.62], [0.32, 0.68]] : [[0, 0, 0, 1, 0], [0, 0, 0, 1, 0], [1, 0, 0], [0, 0.04979, 0.06649, 0.28361, 0.60011], [0.01754, 0.03319, 0.10494, 0.19853, 0.6458], [0.70095, 0.21471, 0.08435], [0.03627, 0.05651, 0.13136, 0.21623, 0.55964], [0.03974, 0.06579, 0.15573, 0.20702, 0.53173], [0.56695, 0.28612, 0.14693], [0, 0.04979, 0.06649, 0.28361, 0.60011], [0.01754, 0.03319, 0.10494, 0.19853, 0.6458], [0.70095, 0.21471, 0.08435], [0.03627, 0.05651, 0.13136, 0.21623, 0.55964], [0.03974, 0.06579, 0.15573, 0.20702, 0.53173], [0.56695, 0.28612, 0.14693], [0, 0.04979, 0.06649, 0.28361, 0.60011], [0.01754, 0.03319, 0.10494, 0.19853, 0.6458], [0.70095, 0.21471, 0.08435], [0.03627, 0.05651, 0.13136, 0.21623, 0.55964], [0.03974, 0.06579, 0.15573, 0.20702, 0.53173], [0.56695, 0.28612, 0.14693]];
     data = data.length !== 0 ? data : dummyData;
     const markPoints = isY ? getMarkPointsForBarFullY(chart, data) : getMarkPointsForBarFullX(chart, data);
     data = getDefaultData(chart, data);
@@ -245,7 +290,7 @@ export function getChartOption(chart, data, isPdf) {
             show: isPdf,
             position: 'inside',
             // formatter: '{c}%',
-            formatter: function(params) {
+            formatter: function (params) {
               if (params.value < 5) {
                 return "";
               }
@@ -271,7 +316,7 @@ export function getChartOption(chart, data, isPdf) {
       series[0].label = {
         show: true,
         // formatter: '{c}%',
-        formatter: function(params) {
+        formatter: function (params) {
           if (params.value < -1) {
             return "你在本题上没有作答";
           } else if (params.value < 0) {
@@ -301,10 +346,13 @@ export function getChartOption(chart, data, isPdf) {
     },
     tooltip: {
       // formatter: "{c}%",
-      formatter: function(params) {
+      formatter: function (params) {
         if (isChartTypeBarBasic(chart)) {
           return toFixed(params.value);
-        } else {
+        } else if (isChartTypePieBasic(chart)) {
+          return toFixed(params.value * 100) + "%";
+        }
+        else {
           if (chart.subType === "bar-full-y") {
             return toPercent(params.value) + "%";
           } else {
@@ -330,9 +378,9 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: "horizontal",
-      x: "center",
-      y: "bottom",
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : "horizontal",
+      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : "center",
+      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : "bottom",
     },
     xAxis: {
       name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
@@ -395,6 +443,9 @@ export function getChartOption(chart, data, isPdf) {
 
   if (isY) {
     [option.xAxis, option.yAxis] = [option.yAxis, option.xAxis];
+  } else if (ispie) {
+    delete option.xAxis;
+    delete option.yAxis;
   }
   return option;
 }
@@ -429,8 +480,64 @@ class Chart extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      classes: props,
+      classes: props,//数据源
     };
+    // console.log(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(value) {
+    if (parseInt(value) === 0) {
+      const chart = this.props.chart;
+      chart.type = 'pie';
+      chart.subType = 'pie-basic-simple';
+      chart.scopes = [
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "几乎没有",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1小时以内",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1-2小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2-3小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3-4小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4小时级以上",
+          "text": "自主学习力",
+          "askId": 395
+        }
+      ];
+      this.setState({
+        chart,
+      });
+    }
   }
 
   renderData() {
@@ -439,7 +546,7 @@ class Chart extends React.Component {
     }
 
     return (
-      <div style={{marginBottom: "20px"}}>
+      <div style={{ marginBottom: "20px" }}>
         服务器回传数据：
         {
           JSON.stringify(this.props.data)
@@ -448,6 +555,9 @@ class Chart extends React.Component {
     )
   }
 
+  onEvents = {
+    'select': this.handleChange
+  }
   renderChart(chart, data) {
     if (chart.scopes.length === 0) {
       return Setting.wrapError("请至少添加一个范围");
@@ -465,14 +575,29 @@ class Chart extends React.Component {
         </div>
       )
     }
+    console.log(chart);
 
     const option = getChartOption(chart, data, false);
     return (
       <div>
         {
+          <Select defaultValue="default" style={{ width: 120 }} onChange={this.handleChange} >
+            <Option value='default'>请选择图例</Option>
+            <Option value="0">饼状图</Option>
+            <Option value="1">纵向直方图</Option>
+            <Option value="2">典型直方图</Option>
+            <Option value="3">雷达图</Option>
+            <Option value="4">盒型图1</Option>
+            <Option value="5">盒型图2</Option>
+            <Option value="6">复杂饼状图</Option>
+            <Option value="7">纵向多种条形图</Option>
+            <Option value="8">横向多种条形图</Option>
+          </Select>
+        }
+        {
           this.renderData()
         }
-        <ReactEcharts style={{width: chart.width, height: chart.height, border: '2px solid rgb(217,217,217)'}} option={option} notMerge={true}/>
+        <ReactEcharts style={{ width: chart.width, height: chart.height, border: '2px solid rgb(217,217,217)' }} option={option} notMerge={true} onEvents={this.onEvents} />
       </div>
     )
   }
