@@ -155,6 +155,10 @@ export function isChartTypePieBasic(chart) {
   return chart.subType === "pie-basic-simple";
 }
 
+export function isChartTypeBarVertical(chart) {
+  return chart.subType === "bar-vertical-y";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -224,6 +228,41 @@ export function getChartOption(chart, data, isPdf) {
         color: "#000000",
       },
       data: data,
+    });
+  } else if (isChartTypeBarVertical(chart)) {
+    const options = chart.options;
+    const ranges = scopes.map(scope => scope.range);
+    const uniqueRanges = ranges.filter((range, i) => {
+      return ranges.indexOf(range) === i;
+    });
+    isY = chart.subType === "bar-vertical-y";
+    yData = uniqueRanges;
+    data = data.length !== 0 ? data : [[30.5, 45.7], [69.5, 54.3]];
+    data = getDefaultData(chart, data);
+    legendData = options;
+    const transposedData = Setting.transpose2dArray(data);
+    options.forEach((option, i) => {
+      series.push(
+        {
+          name: option,
+          type: 'bar',
+          barGap: 0,
+          label: {
+            show: true,
+            position: isY ? "top" : "right",
+            formatter: function (params) {
+              if (params.value < 0) {
+                return "你在本题上没有作答";
+              } else if (params.value === 0) {
+                return "贵校在该题上缺乏有效数据";
+              }
+              return toFixed(params.value);
+            },
+            color: "#000000",
+          },
+          data: transposedData[i],
+        }
+      );
     });
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
@@ -334,7 +373,7 @@ export function getChartOption(chart, data, isPdf) {
     color: chart.barColors,
     grid: {
       // top: "30%",
-      right: isChartTypeBarFull(chart) ? "5%" : "5%",
+      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : "5%",
       containLabel: true,
       top: chart.title !== "" ? 60 : 30,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : 40,
@@ -351,6 +390,8 @@ export function getChartOption(chart, data, isPdf) {
           return toFixed(params.value);
         } else if (isChartTypePieBasic(chart)) {
           return toFixed(params.value * 100) + "%";
+        } else if (isChartTypeBarVertical(chart)) {
+          return toFixed(params.value) + "%";
         }
         else {
           if (chart.subType === "bar-full-y") {
@@ -378,38 +419,38 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : "horizontal",
-      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : "center",
-      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : "bottom",
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : "horizontal",
+      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : "center",
+      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : "bottom",
     },
     xAxis: {
-      name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
+      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
       nameLocation: "middle",
       nameRotate: 0,
       nameGap: 50,
       axisLine: {
-        show: false,
+        show: true,
       },
       axisLabel: {
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : '{value}%',
       },
       axisTick: {
-        show: false,
+        show: true,
       },
       splitLine: {
-        show: chart.subType === "bar-full-y" ? false : true,
+        show: chart.subType === "bar-full-y" ? false : isChartTypeBarVertical(chart) ? true : true,
         // interval: function(param) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : 0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : 100,
+      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : 10,
     },
     yAxis: [{
       data: yData,
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
       axisLabel: {
         show: true,
         fontSize: fontSize,
@@ -425,7 +466,7 @@ export function getChartOption(chart, data, isPdf) {
         }
       },
       axisTick: {
-        show: false,
+        show: true,
       }
     }].concat(yAxisNew),
     // animation: !isPdf,
@@ -534,6 +575,44 @@ class Chart extends React.Component {
           "askId": 395
         }
       ];
+      this.setState({
+        chart,
+      });
+    } else if (parseInt(value) === 1) {
+      const chart = this.props.chart;
+      chart.type = 'bar';
+      chart.subType = 'bar-vertical-y';
+      chart.scopes = [
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习少",
+          "text": "百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习少",
+          "text": "百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习多",
+          "text": "百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习多",
+          "text": "百分比(%)",
+          "askId": 395
+        }
+      ];
+      chart.options = ["四年级", "八年级"]
       this.setState({
         chart,
       });
