@@ -2,6 +2,7 @@ import React from "react";
 import ReactEcharts from 'echarts-for-react';
 import * as Setting from "./Setting";
 import { Select } from 'antd';
+import * as dataTool from "../node_modules/echarts/dist/extension/dataTool.js"
 const { Option } = Select;
 function getScopeId(scope) {
   return scope.text;
@@ -176,6 +177,10 @@ export function isChartTypeRadar(chart) {
   return chart.subType === "radar";
 }
 
+export function isChartTypeBoxplot(chart) {
+  return chart.subType === "boxplot-basic-y";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -188,6 +193,7 @@ export function getChartOption(chart, data, isPdf) {
   let ispie = false;
   let isradar = false;
   let indicatorData = [];
+  let dataset = [];
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -332,9 +338,7 @@ export function getChartOption(chart, data, isPdf) {
     const uniqueRanges = ranges.filter((range, i) => {
       return ranges.indexOf(range) === i;
     });
-    console.log(uniqueRanges);
     isradar = chart.subType === "radar";
-    console.log(options)
     legendData = options
     data = data.length !== 0 ? data.map((row) => row[0]) : [[30, 33, 55],
     [35, 38, 65],
@@ -346,7 +350,6 @@ export function getChartOption(chart, data, isPdf) {
     [75, 75, 85]
     ];
     data = getDefaultData(chart, data);
-    console.log(data);
     indicatorData = getindicatorData(uniqueRanges);
     const transposedData = Setting.transpose2dArray(data);
     console.log(transposedData)
@@ -361,6 +364,57 @@ export function getChartOption(chart, data, isPdf) {
         })
     }
     );
+  } else if (isChartTypeBoxplot(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    isY = chart.subType === "boxplot-basic-y";
+    yData = options;
+    data =
+      data.length !== 0
+        ? data.map((row) => row[0])
+        : [[446.4429432,
+          512.8455151,
+          381.1205591,
+          346.2006511,
+          645.2008944
+        ], [422.1927263,
+          525.5307233,
+          492.2898466,
+          356.5856599,
+          658.8386935
+        ], [422.1927263,
+          520.6919662,
+          339.5552561,
+          309.3014429,
+          663.3666584,
+        ]];
+    data = getDefaultData(chart, data);
+    data = dataTool.prepareBoxplotData(data);
+    console.log(data);
+    data.boxData.forEach((value, i) => {
+      let sum = value[value.length - 1] - value[0];
+      let percent = ((value[2] - value[0]) / sum).toFixed(2);
+      dataset.push({
+        value: value,
+        itemStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [{
+              offset: 1 - percent, color: 'red' // 0% 处的颜色
+            }, {
+              offset: 1 - percent, color: 'blue' // 100% 处的颜色
+            }]
+          }
+        },
+      });
+    })
+    series.push({
+      type: "boxplot",
+      data: dataset,
+    })
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -483,7 +537,7 @@ export function getChartOption(chart, data, isPdf) {
     tooltip: {
       // formatter: "{c}%",
       show: true,
-      trigger: isChartTypeRadar(chart) ? 'item':null,
+      trigger: isChartTypeRadar(chart) ? 'item' : null,
       formatter: function (params) {
         if (isChartTypeBarBasic(chart)) {
           return toFixed(params.value);
@@ -493,7 +547,7 @@ export function getChartOption(chart, data, isPdf) {
           return toFixed(params.value) + "%";
         } else if (isChartTypeBarTypical(chart)) {
           return toFixed(params.value) + "%";
-        } else if(isChartTypeRadar(chart)){
+        } else if (isChartTypeRadar(chart)) {
           return toFixed(params.value);
         }
         else {
@@ -527,16 +581,16 @@ export function getChartOption(chart, data, isPdf) {
       y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : isChartTypeRadar(chart) ? "center" : "bottom",
     },
     radar: !isChartTypeRadar(chart) ? null : {
-      name:{
-        show:true,
-        fontSize:13,
+      name: {
+        show: true,
+        fontSize: 13,
       },
-      nameGap:0,
-      radius:'88%',
-      indicator: indicatorData, 
+      nameGap: 0,
+      radius: '88%',
+      indicator: indicatorData,
     },
     xAxis: {
-      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
+      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
       nameLocation: "middle",
       nameRotate: 0,
       nameGap: 50,
@@ -549,7 +603,7 @@ export function getChartOption(chart, data, isPdf) {
       },
       axisLabel: {
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : isChartTypeBarTypical(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : isChartTypeBarTypical(chart) ? '{value}' : isChartTypeBoxplot(chart) ? '{value}' : '{value}%',
       },
       axisTick: {
         show: true,
@@ -560,9 +614,9 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : isChartTypeBoxplot(chart) ? null : 0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : isChartTypeBoxplot(chart) ? null : 100,
+      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : isChartTypeBoxplot(chart) ? 50 : 10,
     },
     yAxis: [{
       data: yData,
@@ -573,7 +627,7 @@ export function getChartOption(chart, data, isPdf) {
       nameTextStyle: {
         fontSize: isChartTypeBarTypical(chart) ? 13 : null,
       },
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
       axisLabel: {
         show: true,
         fontSize: fontSize,
@@ -884,13 +938,6 @@ class Chart extends React.Component {
               "text": "",
               "askId": 395
             },
-             {
-              "id": 0,
-              "type": "默认",
-              "range": "信息素养",
-              "text": "",
-              "askId": 395
-            },
             {
               "id": 0,
               "type": "默认",
@@ -905,7 +952,14 @@ class Chart extends React.Component {
               "text": "",
               "askId": 395
             },
-             {
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "信息素养",
+              "text": "",
+              "askId": 395
+            },
+            {
               "id": 0,
               "type": "默认",
               "range": "审美素养",
@@ -926,13 +980,6 @@ class Chart extends React.Component {
               "text": "",
               "askId": 395
             },
-             {
-              "id": 0,
-              "type": "默认",
-              "range": "国际素养",
-              "text": "",
-              "askId": 395
-            },
             {
               "id": 0,
               "type": "默认",
@@ -947,7 +994,14 @@ class Chart extends React.Component {
               "text": "",
               "askId": 395
             },
-             {
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "国际素养",
+              "text": "",
+              "askId": 395
+            },
+            {
               "id": 0,
               "type": "默认",
               "range": "创新素养",
@@ -1038,8 +1092,41 @@ class Chart extends React.Component {
           });
         };
         break;
-        default:
-           alert("请选择正确的图例");
+      case 4:
+        {
+          const chart = this.props.chart;
+          chart.type = 'boxplot';
+          chart.subType = 'boxplot-basic-y';
+          chart.scopes = [
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "识记",
+              "text": "分数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "理解",
+              "text": "分数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "运用",
+              "text": "分数",
+              "askId": 395
+            }
+          ];
+          this.setState({
+            chart,
+          });
+        };
+        break;
+      default:
+        alert("请选择正确的图例");
     }
   }
 
