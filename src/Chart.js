@@ -20,6 +20,15 @@ function PieDataProcess(legendData, data) {
   return res
 }
 
+function getindicatorData(indicatorname) {
+  let res = [];
+  indicatorname.forEach(value => {
+    res.push({ name: value, max: 100 });
+  });
+  res[0].axisLabel = { show: true };
+  return res;
+}
+
 function getMarkPointsForBarFullY(chart, data) {
   let markPoints = [];
   chart.scopes.forEach((scope, i) => {
@@ -163,6 +172,10 @@ export function isChartTypeBarTypical(chart) {
   return chart.subType === "bar-typical-y";
 }
 
+export function isChartTypeRadar(chart) {
+  return chart.subType === "radar";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -173,6 +186,8 @@ export function getChartOption(chart, data, isPdf) {
   let series = [];
   let isY = false;
   let ispie = false;
+  let isradar = false;
+  let indicatorData = [];
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -311,6 +326,41 @@ export function getChartOption(chart, data, isPdf) {
         }
       );
     });
+  } else if (isChartTypeRadar(chart)) {
+    const options = chart.options;
+    const ranges = scopes.map(scope => scope.range);
+    const uniqueRanges = ranges.filter((range, i) => {
+      return ranges.indexOf(range) === i;
+    });
+    console.log(uniqueRanges);
+    isradar = chart.subType === "radar";
+    console.log(options)
+    legendData = options
+    data = data.length !== 0 ? data.map((row) => row[0]) : [[30, 33, 55],
+    [35, 38, 65],
+    [45, 49, 50],
+    [55, 51, 66],
+    [60, 67, 69],
+    [65, 78, 78],
+    [70, 90, 94],
+    [75, 75, 85]
+    ];
+    data = getDefaultData(chart, data);
+    console.log(data);
+    indicatorData = getindicatorData(uniqueRanges);
+    const transposedData = Setting.transpose2dArray(data);
+    console.log(transposedData)
+    options.forEach((option, i) => {
+      series.push(
+        {
+          type: "radar",
+          data: [{
+            name: option,
+            value: transposedData[i]
+          }]
+        })
+    }
+    );
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -432,6 +482,8 @@ export function getChartOption(chart, data, isPdf) {
     },
     tooltip: {
       // formatter: "{c}%",
+      show: true,
+      trigger: isChartTypeRadar(chart) ? 'item':null,
       formatter: function (params) {
         if (isChartTypeBarBasic(chart)) {
           return toFixed(params.value);
@@ -441,6 +493,8 @@ export function getChartOption(chart, data, isPdf) {
           return toFixed(params.value) + "%";
         } else if (isChartTypeBarTypical(chart)) {
           return toFixed(params.value) + "%";
+        } else if(isChartTypeRadar(chart)){
+          return toFixed(params.value);
         }
         else {
           if (chart.subType === "bar-full-y") {
@@ -468,9 +522,18 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : "horizontal",
-      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : "center",
-      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : "bottom",
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : isChartTypeRadar(chart) ? "vertical" : "horizontal",
+      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : isChartTypeRadar(chart) ? "right" : "center",
+      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : isChartTypeRadar(chart) ? "center" : "bottom",
+    },
+    radar: !isChartTypeRadar(chart) ? null : {
+      name:{
+        show:true,
+        fontSize:13,
+      },
+      nameGap:0,
+      radius:'88%',
+      indicator: indicatorData, 
     },
     xAxis: {
       name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
@@ -544,7 +607,7 @@ export function getChartOption(chart, data, isPdf) {
 
   if (isY) {
     [option.xAxis, option.yAxis] = [option.yAxis, option.xAxis];
-  } else if (ispie) {
+  } else if (ispie || isradar) {
     delete option.xAxis;
     delete option.yAxis;
   }
@@ -587,204 +650,396 @@ class Chart extends React.Component {
     this.handleChange = this.handleChange.bind(this);
   }
   handleChange(value) {
-    if (parseInt(value) === 0) {
-      const chart = this.props.chart;
-      chart.type = 'pie';
-      chart.subType = 'pie-basic-simple';
-      chart.scopes = [
+    switch (parseInt(value)) {
+      case 0:
         {
-          "id": 0,
-          "type": "默认",
-          "range": "几乎没有",
-          "text": "自主学习力",
-          "askId": 395
-        },
+          const chart = this.props.chart;
+          chart.type = 'pie';
+          chart.subType = 'pie-basic-simple';
+          chart.scopes = [
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "几乎没有",
+              "text": "自主学习力",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "1小时以内",
+              "text": "自主学习力",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "1-2小时",
+              "text": "自主学习力",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "2-3小时",
+              "text": "自主学习力",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "3-4小时",
+              "text": "自主学习力",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "4小时级以上",
+              "text": "自主学习力",
+              "askId": 395
+            }
+          ];
+          this.setState({
+            chart,
+          });
+        };
+        break;
+      case 1:
         {
-          "id": 0,
-          "type": "默认",
-          "range": "1小时以内",
-          "text": "自主学习力",
-          "askId": 395
-        },
+          const chart = this.props.chart;
+          chart.type = 'bar';
+          chart.subType = 'bar-vertical-y';
+          chart.scopes = [
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "父母参与子女学习少",
+              "text": "百分比(%)",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "父母参与子女学习少",
+              "text": "百分比(%)",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "父母参与子女学习多",
+              "text": "百分比(%)",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "父母参与子女学习多",
+              "text": "百分比(%)",
+              "askId": 395
+            }
+          ];
+          chart.options = ["四年级", "八年级"]
+          this.setState({
+            chart,
+          });
+        };
+        break;
+      case 2: {
+        const chart = this.props.chart;
+        chart.type = 'bar';
+        chart.subType = 'bar-typical-y';
+        chart.scopes = [
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "0",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "0",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "1",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "1",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "2",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "2",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "3",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "3",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "4",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "4",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "5",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "5",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "6",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "6",
+            "text": "所占人数百分比(%)",
+            "askId": 395
+          },
+        ];
+        chart.options = ["本校", "株洲市"];
+        chart.datatype = "分值";
+        this.setState({
+          chart,
+        });
+      };
+        break;
+      case 3:
         {
-          "id": 0,
-          "type": "默认",
-          "range": "1-2小时",
-          "text": "自主学习力",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "2-3小时",
-          "text": "自主学习力",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "3-4小时",
-          "text": "自主学习力",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "4小时级以上",
-          "text": "自主学习力",
-          "askId": 395
-        }
-      ];
-      this.setState({
-        chart,
-      });
-    } else if (parseInt(value) === 1) {
-      const chart = this.props.chart;
-      chart.type = 'bar';
-      chart.subType = 'bar-vertical-y';
-      chart.scopes = [
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "父母参与子女学习少",
-          "text": "百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "父母参与子女学习少",
-          "text": "百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "父母参与子女学习多",
-          "text": "百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "父母参与子女学习多",
-          "text": "百分比(%)",
-          "askId": 395
-        }
-      ];
-      chart.options = ["四年级", "八年级"]
-      this.setState({
-        chart,
-      });
-    } else if (parseInt(value) === 2) {
-      const chart = this.props.chart;
-      chart.type = 'bar';
-      chart.subType = 'bar-typical-y';
-      chart.scopes = [
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "0",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "0",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "1",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "1",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "2",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "2",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "3",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "3",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "4",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "4",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "5",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "5",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "6",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-        {
-          "id": 0,
-          "type": "默认",
-          "range": "6",
-          "text": "所占人数百分比(%)",
-          "askId": 395
-        },
-      ];
-      chart.options = ["本校", "株洲市"];
-      chart.datatype = "分值";
-      this.setState({
-        chart,
-      });
+          const chart = this.props.chart;
+          chart.type = 'radar';
+          chart.subType = 'radar';
+          chart.scopes = [
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "生活素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "生活素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "生活素养",
+              "text": "",
+              "askId": 395
+            },
+             {
+              "id": 0,
+              "type": "默认",
+              "range": "信息素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "信息素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "信息素养",
+              "text": "",
+              "askId": 395
+            },
+             {
+              "id": 0,
+              "type": "默认",
+              "range": "审美素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "审美素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "审美素养",
+              "text": "",
+              "askId": 395
+            },
+             {
+              "id": 0,
+              "type": "默认",
+              "range": "国际素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "国际素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "国际素养",
+              "text": "",
+              "askId": 395
+            },
+             {
+              "id": 0,
+              "type": "默认",
+              "range": "创新素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "创新素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "创新素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "学习素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "学习素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "学习素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "身心素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "身心素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "身心素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "品德素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "品德素养",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "品德素养",
+              "text": "",
+              "askId": 395
+            },
+          ];
+          chart.options = ["四年级", "八年级", "十一年级"];
+          this.setState({
+            chart,
+          });
+        };
+        break;
+        default:
+           alert("请选择正确的图例");
     }
   }
 
