@@ -159,6 +159,10 @@ export function isChartTypeBarVertical(chart) {
   return chart.subType === "bar-vertical-y";
 }
 
+export function isChartTypeBarTypical(chart) {
+  return chart.subType === "bar-typical-y";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -239,6 +243,49 @@ export function getChartOption(chart, data, isPdf) {
     yData = uniqueRanges;
     data = data.length !== 0 ? data : [[30.5, 45.7], [69.5, 54.3]];
     data = getDefaultData(chart, data);
+    legendData = options;
+    const transposedData = Setting.transpose2dArray(data);
+    options.forEach((option, i) => {
+      series.push(
+        {
+          name: option,
+          type: 'bar',
+          barGap: 0,
+          label: {
+            show: true,
+            position: isY ? "top" : "right",
+            formatter: function (params) {
+              if (params.value < 0) {
+                return "你在本题上没有作答";
+              } else if (params.value === 0) {
+                return "贵校在该题上缺乏有效数据";
+              }
+              return toFixed(params.value);
+            },
+            color: "#000000",
+          },
+          data: transposedData[i],
+        }
+      );
+    });
+  } else if (isChartTypeBarTypical(chart)) {
+    const options = chart.options;
+    const ranges = scopes.map(scope => scope.range);
+    const uniqueRanges = ranges.filter((range, i) => {
+      return ranges.indexOf(range) === i;
+    });
+    isY = chart.subType === "bar-typical-y";
+    yData = uniqueRanges;
+    data = data.length !== 0 ? data : [[0.07560, 0.09690],
+    [0.05380, 0.06140],
+    [0.17320, 0.16030],
+    [0.21420, 0.24030],
+    [0.24180, 0.23310],
+    [0.19350, 0.16990],
+    [0.04790, 0.03440]
+    ];
+    data = getDefaultData(chart, data);
+    data = get100Times(data)
     legendData = options;
     const transposedData = Setting.transpose2dArray(data);
     options.forEach((option, i) => {
@@ -373,7 +420,7 @@ export function getChartOption(chart, data, isPdf) {
     color: chart.barColors,
     grid: {
       // top: "30%",
-      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : "5%",
+      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : isChartTypeBarTypical(chart) ? "10%" : "5%",
       containLabel: true,
       top: chart.title !== "" ? 60 : 30,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : 40,
@@ -391,6 +438,8 @@ export function getChartOption(chart, data, isPdf) {
         } else if (isChartTypePieBasic(chart)) {
           return toFixed(params.value * 100) + "%";
         } else if (isChartTypeBarVertical(chart)) {
+          return toFixed(params.value) + "%";
+        } else if (isChartTypeBarTypical(chart)) {
           return toFixed(params.value) + "%";
         }
         else {
@@ -419,21 +468,25 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : "horizontal",
-      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : "center",
-      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : "bottom",
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : "horizontal",
+      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : "center",
+      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : "bottom",
     },
     xAxis: {
-      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
+      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
       nameLocation: "middle",
       nameRotate: 0,
       nameGap: 50,
+      nameTextStyle: {
+        fontSize:isChartTypeBarTypical(chart)?13:null,
+        fontWeight:'bold',
+      },
       axisLine: {
         show: true,
       },
       axisLabel: {
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : isChartTypeBarTypical(chart) ? '{value}' : '{value}%',
       },
       axisTick: {
         show: true,
@@ -444,13 +497,20 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : 0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : 100,
+      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : 10,
     },
     yAxis: [{
       data: yData,
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
+      name: chart.datatype,
+      nameLocation: "middle",
+      nameRotate: 0,
+      nameGap: 30,
+      nameTextStyle: {
+        fontSize:isChartTypeBarTypical(chart)?13:null,
+      },
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
       axisLabel: {
         show: true,
         fontSize: fontSize,
@@ -613,6 +673,115 @@ class Chart extends React.Component {
         }
       ];
       chart.options = ["四年级", "八年级"]
+      this.setState({
+        chart,
+      });
+    } else if (parseInt(value) === 2) {
+      const chart = this.props.chart;
+      chart.type = 'bar';
+      chart.subType = 'bar-typical-y';
+      chart.scopes = [
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "0",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "0",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "5",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "5",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "6",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "6",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+      ];
+      chart.options = ["本校", "株洲市"];
+      chart.datatype = "分值";
       this.setState({
         chart,
       });
