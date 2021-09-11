@@ -143,6 +143,14 @@ export function isChartTypeBarY(chart) {
 export function isChartTypePieBasic(chart){
   return chart.subType === "pie-basic"|| chart.subType==="pie-rose"|| chart.subType==="pie-ring";
 }
+<<<<<<< Updated upstream
+=======
+
+export function isChartTypeBarVertical(chart) {
+  return chart.subType === "bar-vertical-y";
+}
+
+>>>>>>> Stashed changes
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -205,6 +213,7 @@ export function getChartOption(chart, data, isPdf) {
             return toFixed(params.value);
           },
         },
+<<<<<<< Updated upstream
         data: data,
       }
     );
@@ -216,6 +225,48 @@ export function getChartOption(chart, data, isPdf) {
   }
 }
   else if (isChartTypeBarFull(chart)) {
+=======
+        color: "#000000",
+      },
+      data: data,
+    });
+  } else if (isChartTypeBarVertical(chart)) {
+    const options = chart.options;
+    const ranges = scopes.map(scope => scope.range);
+    const uniqueRanges = ranges.filter((range, i) => {
+        return ranges.indexOf(range) === i;
+      });
+    isY = chart.subType === "bar-vertical-y";
+    yData = uniqueRanges;
+    data = data.length !== 0 ? data : [[30.5, 45.7], [69.5, 54.3]];
+    data = getDefaultData(chart, data);
+    legendData = options;
+    const transposedData = Setting.transpose2dArray(data);
+    options.forEach((option, i) => {
+      series.push(
+        {
+          name: option,
+          type: 'bar',
+          barGap: 0,
+          label: {
+            show: true,
+            position: isY ? "top" : "right",
+            formatter: function (params) {
+              if (params.value < 0) {
+                return "你在本题上没有作答";
+              } else if (params.value === 0) {
+                return "贵校在该题上缺乏有效数据";
+              }
+              return toFixed(params.value);
+            },
+            color: "#000000",
+          },
+          data: transposedData[i],
+        }
+      );
+    });
+  } else if (isChartTypeBarFull(chart)) {
+>>>>>>> Stashed changes
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
     const dummyData = isY ? [[0.38,0.62],[0.32,0.68]] : [[0,0,0,1,0],[0,0,0,1,0],[1,0,0],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693],[0,0.04979,0.06649,0.28361,0.60011],[0.01754,0.03319,0.10494,0.19853,0.6458],[0.70095,0.21471,0.08435],[0.03627,0.05651,0.13136,0.21623,0.55964],[0.03974,0.06579,0.15573,0.20702,0.53173],[0.56695,0.28612,0.14693]];
@@ -324,7 +375,7 @@ export function getChartOption(chart, data, isPdf) {
     color: chart.barColors,
     grid: {
       // top: "30%",
-      right: isChartTypeBarFull(chart) ? "5%" : "5%",
+      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart)?"10%": "5%",
       containLabel: true,
       top: chart.title !== "" ? 60 : 30,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : 40,
@@ -374,12 +425,18 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
+<<<<<<< Updated upstream
       orient:!(isChartTypePieBasic(chart))? "horizontal":"vertical",
       x: !(isChartTypePieBasic(chart))? "center":"right",
       y: !(isChartTypePieBasic(chart))? "bottom":"center",
+=======
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : (isChartTypePieBasic(chart)||isChartTypeBarVertical(chart))? "vertical" :  "horizontal",
+      x: isChartTypeBarBasic(chart)? "center" : (isChartTypePieBasic(chart) ||isChartTypeBarVertical(chart) )? "right" : "center",
+      y: isChartTypeBarBasic(chart)? "bottom" : (isChartTypePieBasic(chart) ||isChartTypeBarVertical(chart) )? "center" : "bottom",
+>>>>>>> Stashed changes
     },
     xAxis: {
-      name: !isChartTypeBarBasic(chart) ? null : chart.scopes[0].text.split("").join("\n\n"),
+      name: isChartTypeBarBasic(chart)?  chart.scopes[0].text.split("").join("\n\n"):isChartTypeBarVertical(chart)? chart.scopes[0].text.split("").join("\n\n") : null ,
       nameLocation: "middle",
       nameRotate: 0,
       nameGap: 50,
@@ -388,7 +445,7 @@ export function getChartOption(chart, data, isPdf) {
       },
       axisLabel: {
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' :isChartTypeBarVertical(chart)? '{value}':'{value}%',
       },
       axisTick: {
         show: false,
@@ -399,13 +456,13 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 :isChartTypeBarVertical(chart)? 0:0,
+      max: isChartTypeBarBasic(chart) ? 5 :isChartTypeBarVertical(chart)?100: 100,
+      interval: isChartTypeBarBasic(chart)? 1 :isChartTypeBarVertical(chart)?20: 10,
     },
     yAxis: [{
       data: yData,
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ?(chart.order === "down-right"):((chart.order !== "down-right")),
       axisLabel: {
         show: true,
         fontSize: fontSize,
@@ -478,6 +535,103 @@ class Chart extends React.Component {
     this.state = {
       classes: props,
     };
+<<<<<<< Updated upstream
+=======
+    // console.log(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleChange(value) {
+    if (parseInt(value) === 0) {
+      const chart = this.props.chart;
+      chart.type = 'pie';
+      chart.subType = 'pie-basic-simple';
+      chart.scopes = [
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "几乎没有",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1小时以内",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1-2小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2-3小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3-4小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4小时级以上",
+          "text": "自主学习力",
+          "askId": 395
+        }
+      ];
+      this.setState({
+        chart,
+      });
+    } else if(parseInt(value) === 1) {
+       const chart = this.props.chart;
+      chart.type = 'bar';
+      chart.subType = 'bar-vertical-y';
+      chart.scopes = [
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习少",
+          "text": "百分比(%)",
+          "askId": 395
+      },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习少",
+          "text": "百分比(%)",
+          "askId": 395
+      },
+      {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习多",
+          "text": "百分比(%)",
+          "askId": 395
+      },
+      {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习多",
+          "text": "百分比(%)",
+          "askId": 395
+      }
+      ];
+      chart.options=["四年级","八年级"]
+      this.setState({
+        chart,
+      });
+    }
+>>>>>>> Stashed changes
   }
 
   renderData() {
