@@ -21,6 +21,22 @@ function PieDataProcess(legendData, data) {
   return res
 }
 
+function toMin(yAxisData) {
+  if ((Math.min.apply(null, yAxisData) >= 0) && (Math.min.apply(null, yAxisData) <= 10)) {
+    return Math.min.apply(null, yAxisData);
+  } else {
+    return Math.min.apply(null, yAxisData) - 10;
+  }
+};
+
+function toMax(yAxisData) {
+  if ((Math.max.apply(null, yAxisData) >= 90) && (Math.max.apply(null, yAxisData) <= 100)) {
+    return Math.max.apply(null, yAxisData);
+  } else {
+    return Math.max.apply(null, yAxisData) + 10;
+  }
+}
+
 function getindicatorData(indicatorname) {
   let res = [];
   indicatorname.forEach(value => {
@@ -181,6 +197,10 @@ export function isChartTypeBoxplot(chart) {
   return chart.subType === "boxplot-basic-y";
 }
 
+export function isChartTypeBoxplot2(chart) {
+  return chart.subType === "boxplot2-basic-y";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -194,6 +214,9 @@ export function getChartOption(chart, data, isPdf) {
   let isradar = false;
   let indicatorData = [];
   let dataset = [];
+  let datamin;
+  let datamax;
+  let markdata = [];
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -415,6 +438,72 @@ export function getChartOption(chart, data, isPdf) {
       type: "boxplot",
       data: dataset,
     })
+  } else if (isChartTypeBoxplot2(chart)) {
+    const options = chart.options;
+    const ranges = scopes.map(scope => scope.range);
+    const uniqueRanges = ranges.filter((range, i) => {
+      return ranges.indexOf(range) === i;
+    });
+    isY = chart.subType === "boxplot2-basic-y";
+    yData = uniqueRanges;
+    data = data.length !== 0 ? data : [[72.22], [42.86, 76.93, 80.74, 86.18, 100.00], [46.68, 50.91, 56.89, 62.35, 69.98]];
+    data = getDefaultData(chart, data);
+    let yAxisData = data.flat();
+    datamax = toMax(yAxisData);
+    datamin = toMin(yAxisData);
+    data.forEach((value, index) => {
+      if (value.length === 1) {
+        markdata.push({
+          value: yData[index],
+          coord: [yData[index], value[0]],
+          symbol: 'circle',
+          symbolSize: 10,
+          itemStyle: {
+            color: 'red',
+          },
+          label: {
+            show: true,
+            position: 'right',
+            fontSize: 10,
+            fontWeight: 'bold',
+            fontFamily: '楷体',
+          }
+        });
+      } else {
+        value.forEach((i, j) => {
+          markdata.push({
+            value: options[j],
+            coord: [yData[index], i],
+            symbol: 'rect',
+            symbolSize: [20, 5],
+            itemStyle: {
+              color: 'gray',
+              borderColor: 'black',
+              borderWidth: 1,
+            },
+            label: {
+              show: true,
+              position: 'right',
+              fontSize: 10,
+              fontWeight: 'bold',
+              fontFamily: '楷体',
+            }
+          })
+        })
+      }
+    });
+    series.push({
+      data: (new Array(yData.length)).fill(100), //变数据
+      type: 'bar',
+      barWidth: 30,
+      itemStyle: {
+        color: "gray",
+        opacity: 0.5,
+      },
+      markPoint: {
+        data: markdata,
+      }
+    });
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -524,10 +613,10 @@ export function getChartOption(chart, data, isPdf) {
     color: chart.barColors,
     grid: {
       // top: "30%",
-      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : isChartTypeBarTypical(chart) ? "10%" : "5%",
+      right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : isChartTypeBarTypical(chart) ? "10%" : isChartTypeBoxplot2(chart) ? "10%" : "5%",
       containLabel: true,
-      top: chart.title !== "" ? 60 : 30,
-      bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : 40,
+      top: chart.title !== "" ? 30 : 10,
+      bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : isChartTypeBoxplot2(chart) ? 20 : 40,
     },
     title: {
       text: chart.title,
@@ -548,6 +637,8 @@ export function getChartOption(chart, data, isPdf) {
         } else if (isChartTypeBarTypical(chart)) {
           return toFixed(params.value) + "%";
         } else if (isChartTypeRadar(chart)) {
+          return toFixed(params.value);
+        } else if (isChartTypeBoxplot2(chart)) {
           return toFixed(params.value);
         }
         else {
@@ -590,7 +681,7 @@ export function getChartOption(chart, data, isPdf) {
       indicator: indicatorData,
     },
     xAxis: {
-      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
+      name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot2(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
       nameLocation: "middle",
       nameRotate: 0,
       nameGap: 50,
@@ -603,7 +694,7 @@ export function getChartOption(chart, data, isPdf) {
       },
       axisLabel: {
         fontSize: fontSize,
-        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : isChartTypeBarTypical(chart) ? '{value}' : isChartTypeBoxplot(chart) ? '{value}' : '{value}%',
+        formatter: isChartTypeBarBasic(chart) ? '{value}' : isChartTypeBarVertical(chart) ? '{value}' : isChartTypeBarTypical(chart) ? '{value}' : isChartTypeBoxplot(chart) ? '{value}' : isChartTypeBoxplot2(chart) ? '{value}' : '{value}%',
       },
       axisTick: {
         show: true,
@@ -614,9 +705,10 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : isChartTypeBoxplot(chart) ? null : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : isChartTypeBoxplot(chart) ? null : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : isChartTypeBoxplot(chart) ? 50 : 10,
+      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : isChartTypeBoxplot(chart) ? null : isChartTypeBoxplot2(chart) ? datamin : 0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : isChartTypeBoxplot(chart) ? null : isChartTypeBoxplot2(chart) ? datamax : 100,
+      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : isChartTypeBoxplot(chart) ? 50 : isChartTypeBoxplot2(chart) ? null : 10,
+      splitNumber: isChartTypeBoxplot2(chart) ? 13 : null,
     },
     yAxis: [{
       data: yData,
@@ -627,7 +719,7 @@ export function getChartOption(chart, data, isPdf) {
       nameTextStyle: {
         fontSize: isChartTypeBarTypical(chart) ? 13 : null,
       },
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : isChartTypeBoxplot2(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
       axisLabel: {
         show: true,
         fontSize: fontSize,
@@ -1120,6 +1212,103 @@ class Chart extends React.Component {
               "askId": 395
             }
           ];
+          this.setState({
+            chart,
+          });
+        };
+        break;
+      case 5:
+        {
+          const chart = this.props.chart;
+          chart.type = 'boxplot2';
+          chart.subType = 'boxplot2-basic-y';
+          chart.scopes = [
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本校",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本区",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本区",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本区",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本区",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本区",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本市",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本市",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本市",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本市",
+              "text": "亲子关系指数",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "本市",
+              "text": "亲子关系指数",
+              "askId": 395
+            }
+          ];
+          chart.options = [
+            '95%的学校高于此点',
+            '75%的学校高于此点',
+            '50%的学校高于此点',
+            '25%的学校高于此点',
+            '5%的学校高于此点'
+          ];
+          chart.title = "本校在亲子关系指数上的表现";
           this.setState({
             chart,
           });
