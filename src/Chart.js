@@ -12,6 +12,96 @@ function getScopeId2(scope) {
   return `${scope.text} - ${scope.type}`;
 }
 
+function PieDataSum(data) {
+  data = data.flat();
+  let sum = 0;
+  for (var i = data.length - 1; i >= 0; i--) {
+    sum += data[i];
+  }
+  return sum;
+}
+
+function otherPercent(data, sum) {
+  data = data.slice(data.length - 4);
+  data = data.flat();
+  let percent = 0;
+  let othersum = 0;
+  for (var i = data.length - 1; i >= 0; i--) {
+    othersum += data[i];
+  }
+  percent = ((othersum / sum) * 100)
+  return [percent, othersum];
+}
+
+function CompositePieDataProcess(legendData, data, othersum, chart) {
+  let res = [];
+  for (var i = 0; i <= legendData.length - 4; i++) {
+    if (i !== legendData.length - 4) {
+      var item = {
+        value: data[i], name: legendData[i], itemStyle: {
+          color: chart.pieColors[i]
+        }
+      };
+      res.push(item);
+    } else {
+      var otheritem = {
+        value: othersum, name: "其它", itemStyle: {
+          color: chart.pieColors[i]
+        }
+      };
+      res.push(otheritem);
+    }
+  }
+  return res
+}
+
+function Processcompositepie(data, lengend) {
+  let res = [];
+  data = data.slice(data.length - 4);
+  lengend = lengend.slice(lengend.length - 4)
+  for (var i = 0; i < lengend.length; i++) {
+    let piedata = [];
+    piedata.push(lengend[i]);
+    piedata.push(data[i]);
+    res.push(piedata);
+  }
+  return res;
+}
+
+function getMarkLineData(percent, height, width, otherdata) {
+  let x0 = width * 0.2
+    ; // 圆心x轴坐标
+  let x1 = x0 + (height * 0.45) * Math.cos((45 * 3.14) / 180);
+  let y1 = height * 0.5 - (height * 0.45) * Math.sin((45 * 3.14) / 180); //先定死起始点坐标
+  let ao = 360 * (percent / 100); // 扇形角度
+  let ao1 = 0; // 用来计算的坐标角度
+  ao1 = ao <= 45 ? 45 - ao : 360 - (ao - 45);
+  let x2 = 0, y2 = 0;
+  x2 = x0 + (height * 0.45) * Math.cos((ao1 * 3.14) / 180);
+  y2 = height * 0.5 - (height * 0.45) * Math.sin((ao1 * 3.14) / 180);
+  console.log(y2)
+  return [
+    [{
+      x: x1,
+      y: y1,
+    },
+    {
+      coord: ["其它", otherdata],
+      symbol: "none",
+    },
+    ],
+    [{
+      x: x2,
+      y: y2,
+    },
+    {
+      coord: ["其它", 0],
+      symbol: "none",
+    },
+    ],
+  ];
+}
+
 function PieDataProcess(legendData, data) {
   let res = [];
   for (var i = 0; i < legendData.length; i++) {
@@ -199,6 +289,10 @@ export function isChartTypeBoxplot(chart) {
 
 export function isChartTypeBoxplot2(chart) {
   return chart.subType === "boxplot2-basic-y";
+}
+
+export function isChartTypeCompositePie(chart) {
+  return chart.subType === "compositepie";
 }
 
 export function getChartOption(chart, data, isPdf) {
@@ -504,6 +598,84 @@ export function getChartOption(chart, data, isPdf) {
         data: markdata,
       }
     });
+  } else if (isChartTypeCompositePie(chart)) {
+    const options = chart.scopes.map((scope) => getScopeLabel(scope));
+    isY = chart.subType === "compositepie";
+    legendData = options;
+    data = data.length !== 0 ? data.map((row) => row[0]) : [[7.672883918], [11.98304674], [0.240770104], [7.291883219], [4.275029987], [3.846806493], [9.708357257], [35.76251798], [18.51224522], [0.706459077]].map((row) => row[0]);
+    let endData = Processcompositepie(data, legendData)
+    let sum = PieDataSum(data);
+    let other = otherPercent(data, sum);
+    let percent = other[0];
+    let otherdata = other[1];
+    let Piedata = CompositePieDataProcess(legendData, data, otherdata, chart);
+    let height = chart.height;
+    let width = chart.width;
+    let markLineData = getMarkLineData(percent, height, width, otherdata);
+    series.push({
+      type: "pie",
+      radius: "90%",
+      center: ["20%", "50%"],
+      minShowLabelAngle: 5,
+      label: {
+        show: true,
+        position: 'inside',
+        formatter: function (params) {
+          console.log(params);
+          if (params.value < 0) {
+            return "你在本题上没有作答";
+          } else if (params.value === 0) {
+            return "贵校在该题上缺乏有效数据";
+          }
+          return ((params.value / sum) * 100).toFixed(1);
+        },
+        fontSize: 12,
+      },
+      startAngle: 45, // 起始角度 45
+      clockwise: false, // 逆时针
+      data: Piedata,
+    })
+    console.log(endData);
+    endData.forEach((value, index) => {
+      let name = value[0];
+      let data = value[1];
+      series.push({
+        name: name,
+        type: "bar",
+        stack: "其它",
+        barWidth: 60,
+        center: ["0%", "50%"],
+        label: {
+          show: true,
+          position: 'right',
+          formatter: function (params) {
+            console.log(params);
+            if (params.value < 0) {
+              return "你在本题上没有作答";
+            } else if (params.value === 0) {
+              return "贵校在该题上缺乏有效数据";
+            }
+            return ((params.value / sum) * 100).toFixed(1);
+          },
+          fontSize: 12,
+        },
+        data: [{
+          value: data, itemStyle: {
+            color: chart.barColors[index]
+          }
+        }
+        ],
+        markLine: {
+          lineStyle: {
+            type: "solid",
+            width: 1,
+            color: "black",
+          },
+          symbol: "none",
+          data: markLineData,
+        },
+      })
+    })
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -611,19 +783,19 @@ export function getChartOption(chart, data, isPdf) {
 
   const option = {
     color: chart.barColors,
-    grid: {
+    grid: isChartTypeCompositePie(chart) ? {} : {
       // top: "30%",
       right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : isChartTypeBarTypical(chart) ? "10%" : isChartTypeBoxplot2(chart) ? "10%" : "5%",
       containLabel: true,
       top: chart.title !== "" ? 30 : 10,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : isChartTypeBoxplot2(chart) ? 20 : 40,
     },
-    title: {
+    title: isChartTypeCompositePie(chart) ?{}:{
       text: chart.title,
       // text: getOptionLength(chart),
       x: "center",
     },
-    tooltip: {
+    tooltip: isChartTypeCompositePie(chart) ? {} : {
       // formatter: "{c}%",
       show: true,
       trigger: isChartTypeRadar(chart) ? 'item' : null,
@@ -639,6 +811,8 @@ export function getChartOption(chart, data, isPdf) {
         } else if (isChartTypeRadar(chart)) {
           return toFixed(params.value);
         } else if (isChartTypeBoxplot2(chart)) {
+          return toFixed(params.value);
+        } else if(isChartTypeCompositePie(chart)){
           return toFixed(params.value);
         }
         else {
@@ -667,9 +841,9 @@ export function getChartOption(chart, data, isPdf) {
     legend: {
       data: legendData,
       // top: "10%",
-      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : isChartTypeRadar(chart) ? "vertical" : "horizontal",
-      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : isChartTypeRadar(chart) ? "right" : "center",
-      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : isChartTypeRadar(chart) ? "center" : "bottom",
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : isChartTypeRadar(chart) ? "vertical" : isChartTypeCompositePie(chart) ? "vertical" : "horizontal",
+      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : isChartTypeRadar(chart) ? "right" : isChartTypeCompositePie(chart) ? "right" : "center",
+      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : isChartTypeRadar(chart) ? "center" : isChartTypeCompositePie(chart) ? "center" : "bottom",
     },
     radar: !isChartTypeRadar(chart) ? null : {
       name: {
@@ -681,6 +855,7 @@ export function getChartOption(chart, data, isPdf) {
       indicator: indicatorData,
     },
     xAxis: {
+      show: isChartTypeCompositePie(chart) ? false : true,
       name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot2(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
       nameLocation: "middle",
       nameRotate: 0,
@@ -705,13 +880,14 @@ export function getChartOption(chart, data, isPdf) {
         //   return param % 2 === 0;
         // }
       },
-      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : isChartTypeBoxplot(chart) ? null : isChartTypeBoxplot2(chart) ? datamin : 0,
-      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : isChartTypeBoxplot(chart) ? null : isChartTypeBoxplot2(chart) ? datamax : 100,
-      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : isChartTypeBoxplot(chart) ? 50 : isChartTypeBoxplot2(chart) ? null : 10,
+      min: isChartTypeBarBasic(chart) ? 0 : isChartTypeBarVertical(chart) ? 0 : isChartTypeBarTypical(chart) ? 0 : isChartTypeBoxplot(chart) ? null : isChartTypeBoxplot2(chart) ? datamin : isChartTypeCompositePie(chart) ? null : 0,
+      max: isChartTypeBarBasic(chart) ? 5 : isChartTypeBarVertical(chart) ? 100 : isChartTypeBarTypical(chart) ? 100 : isChartTypeBoxplot(chart) ? null : isChartTypeBoxplot2(chart) ? datamax : isChartTypeCompositePie(chart) ? null : 100,
+      interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : isChartTypeBoxplot(chart) ? 50 : isChartTypeBoxplot2(chart) ? null : isChartTypeCompositePie(chart) ? null : 10,
       splitNumber: isChartTypeBoxplot2(chart) ? 13 : null,
     },
     yAxis: [{
-      data: yData,
+      show: isChartTypeCompositePie(chart) ? false : true,
+      data: isChartTypeCompositePie(chart) ? ['其它'] : yData,
       name: isChartTypeBarTypical(chart) ? chart.datatype : null,
       nameLocation: "middle",
       nameRotate: 0,
@@ -719,8 +895,8 @@ export function getChartOption(chart, data, isPdf) {
       nameTextStyle: {
         fontSize: isChartTypeBarTypical(chart) ? 13 : null,
       },
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : isChartTypeBoxplot2(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
-      axisLabel: {
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : isChartTypeBoxplot2(chart) ? (chart.order === "down-right") : isChartTypeCompositePie(chart) ? null : ((chart.order !== "down-right")),
+      axisLabel: isChartTypeCompositePie(chart) ? null : {
         show: true,
         fontSize: fontSize,
         textStyle: {
@@ -728,7 +904,7 @@ export function getChartOption(chart, data, isPdf) {
           // fontSize: 14,
         }
       },
-      axisLine: {
+      axisLine: isChartTypeCompositePie(chart) ? null : {
         show: true,
         lineStyle: {
           color: "rgb(217,217,217)",
@@ -1314,6 +1490,107 @@ class Chart extends React.Component {
           });
         };
         break;
+      case 6:
+        {
+          const chart = this.props.chart;
+          chart.type = 'pie';
+          chart.subType = 'compositepie';
+          chart.scopes = [
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "不知道",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "无工作",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "政府机构的高级行政人员",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "企业管理人员",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "教育、医务、科研人员、专业技术人员",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "政府普通工作人员",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "商业服务业人员",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "私营或个体经营者",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "工人",
+              "text": "",
+              "askId": 395
+            },
+            {
+              "id": 0,
+              "type": "默认",
+              "range": "农民，一直在农村种地或做其他事情",
+              "text": "",
+              "askId": 395
+            },
+          ];
+          chart.barColors = [
+            "rgb(0,191,255)",
+            "black",
+            "pink",
+            "green"
+          ];
+          chart.pieColors = [
+            "rgb(68,114,196)",
+            "rgb(237,125,49)",
+            "rgb(165,165,165)",
+            "rgb(255,192,0)",
+            "rgb(91,155,213)",
+            "rgb(243,98,98)",
+            "rgb(99,217,90)",
+            "rgb(80,109,132)",
+            "rgb(231,158,10)",
+            "rgb(158,102,194)",
+            "rgb(229,30,179)"
+          ];
+          this.setState({
+            chart,
+          });
+        };
+        break;
       default:
         alert("请选择正确的图例");
     }
@@ -1368,7 +1645,7 @@ class Chart extends React.Component {
             <Option value="3">雷达图</Option>
             <Option value="4">盒型图1</Option>
             <Option value="5">盒型图2</Option>
-            <Option value="6">复杂饼状图</Option>
+            <Option value="6">复合饼状图</Option>
             <Option value="7">纵向多种条形图</Option>
             <Option value="8">横向多种条形图</Option>
           </Select>
