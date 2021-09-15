@@ -213,6 +213,300 @@ function getScopeLabel(scope) {
   return `${getScopeRangeText(scope.range)}`;
 }
 
+function getScopeText(scope) {
+  // return `${scope.text}—${getScopeRangeText(scope.range)}`;
+  return `${getScopeRangeText(scope.text)}`;
+}
+
+function getScopeArea(scope) {
+  // return `${scope.text}—${getScopeRangeText(scope.range)}`;
+  return `${getScopeRangeText(scope.area)}`;
+}
+
+function xAxisprocess(length0, length1, length2, xdata, isY) {
+  let xAxis = [];
+  if (length0 !== 0) {
+    xAxis.push({
+      show: true,
+      type: "category",
+      data: xdata,
+      gridIndex: 0,
+      nameGap: 0,
+      axisLabel: {
+        fontSize: 10,
+        color: "black",
+        lineHeight: 0,
+        rotate: isY ? 0 : 90,
+      },
+      axisLine: {
+        lineStyle: {
+          color: "black",
+        },
+      },
+      axisTick: {
+        lineStyle: {
+          color: "balck",
+          length: 20,
+        },
+      },
+      zlevel: 2,
+    });
+  }
+  if (length1 !== 0) {
+    xAxis.push({
+      type: "category",
+      gridIndex: 1,
+      axisLine: {
+        show: false,
+      },
+      zlevel: 1,
+    });
+
+  }
+  if (length2 !== 0) {
+    xAxis.push({
+      type: "category",
+      gridIndex: 2,
+      axisLine: {
+        show: false,
+      },
+    });
+  }
+  return xAxis;
+}
+
+function yAxisprocess(length0, length1, length2) {
+  let yAxis = [];
+  if (length0 !== 0) {
+    yAxis.push({
+      type: "value",
+      gridIndex: 0,
+      max: 100,
+      min: 0,
+      interval: 10,
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: "black",
+        },
+      },
+      axisTick: {
+        show: true,
+        lineStyle: {
+          color: "balck",
+          length: 20,
+        },
+      },
+    });
+  };
+  if (length1 !== 0) {
+    yAxis.push({
+      type: "value",
+      gridIndex: 1,
+      axisLabel: {
+        show: false,
+      },
+      axisLine: {
+        show: false,
+      },
+      splitLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+    });
+  };
+  if (length2 !== 0) {
+    yAxis.push({
+      type: "value",
+      gridIndex: 2,
+      axisLabel: {
+        show: false,
+      },
+      axisLine: {
+        show: false,
+      },
+      splitLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+    });
+  }
+  return yAxis;
+}
+
+function ygridbottomprocess(length0, length1, length2) {
+  let grid = [];
+  if (length0 !== 0) {
+    grid.push({
+      top: 35,
+      left: 40,
+      right: 30,
+      bottom: 35,
+    });
+  }
+  if (length1 !== 0) {
+    grid.push({
+      left: 40,
+      right: 30,
+      height: 20,
+      bottom: 15,
+    });
+  }
+  if (length2 !== 0) {
+    grid.push({
+      left: 40,
+      right: 30,
+      height: 10,
+      bottom: 5,
+    });
+  }
+  return grid;
+}
+
+function xgridbottomprocess(length0, length1, length2) {
+  let grid = [];
+  if (length0 !== 0) {
+    grid.push({
+      left: 40,
+      top: 0,
+      right: 300,
+      bottom: 20
+    });
+  }
+  if (length1 !== 0) {
+    grid.push({
+      left: 15,
+      width: 25,
+      top: 0,
+      bottom: 20
+    });
+  }
+  if (length2 !== 0) {
+    grid.push({
+      left: 5,
+      width: 10,
+      top: 0,
+      bottom: 20
+    });
+  }
+  return grid;
+}
+
+function DuplicateRemoval(arr) {
+  var resultObj = {};
+  var result = [];
+  var result2 = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (result.indexOf(arr[i]) === -1) {
+      result.push(arr[i]);
+    } else {
+      if (result2.indexOf(arr[i]) === -1) {
+        result2.push(arr[i]);
+      }
+    }
+  }
+  var obj = {}
+  arr.forEach((v) => {
+    if (obj[v]) {
+      obj[v]++;
+    } else {
+      obj[v] = 1;
+    }
+  });
+  resultObj.result = result;
+  resultObj.result2 = result2;
+  resultObj.obj = obj;
+  return resultObj
+}
+
+function seriesprocess(length0, length1, length2, Data, option, xdata, x2data, x3data, isY) {
+  let series = [];
+  if (length0 !== 0) {
+    option.forEach(function (value, index) {
+      series.push({
+        name: value,
+        data: Data[index],
+        type: 'bar',
+        barGap: 0,
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+      })
+    })
+  }
+  if (length1 !== 0) {
+    let resultObj = DuplicateRemoval(x2data).obj;
+    for (var key in resultObj) {
+      series.push(
+        {
+          data: [{
+            name: key,
+            value: 1,
+          }],
+          label: {
+            show: true,
+            position: 'inside',
+            formatter: '{b}',
+            offset: isY ? [0, 7] : [0, -5],
+            fontSize: 10,
+            color: 'black',
+            rotate: isY ? null : 90,
+          },
+          type: 'bar',
+          barGap: 0,
+          // eslint-disable-next-line no-loop-func
+          barWidth: (function () {
+            return `${(100 / (xdata.length)) * resultObj[key]}%`;
+          })(),
+          itemStyle: {
+            color: "rgba(255, 255, 255, 1)",
+            borderColor: 'gray',
+            borderWidth: 0.1,
+          },
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+        })
+    }
+  }
+  if (length2 !== 0) {
+    let resultObj = DuplicateRemoval(x3data).obj;
+    for (key in resultObj) {
+      series.push(
+        {
+          data: [{
+            name: key,
+            value: 1,
+          }],
+          label: {
+            show: true,
+            position: 'inside',
+            formatter: '{b}',
+            offset: [0, 1],
+            fontSize: 10,
+            color: 'black',
+            rotate: isY ? null : 90,
+          },
+          type: 'bar',
+          barGap: 0,
+          // eslint-disable-next-line no-loop-func
+          barWidth: (function () { return `${(100 / (xdata.length)) * resultObj[key]}%`; })(),
+          itemStyle: {
+            color: "rgba(255, 255, 255, 1)",
+            borderColor: 'gray',
+            borderWidth: 0.1,
+          },
+          xAxisIndex: 2,
+          yAxisIndex: 2,
+        },
+      )
+    }
+  }
+  return series;
+}
+
 function getDefaultData(chart, data) {
   let res = [];
   chart.scopes.forEach((scope, i) => {
@@ -295,6 +589,10 @@ export function isChartTypeCompositePie(chart) {
   return chart.subType === "compositepie";
 }
 
+export function isChartTypeBarMutiple(chart) {
+  return chart.subType === "bar-mutiple-y" || chart.subType === "bar-mutiple-x";
+}
+
 export function getChartOption(chart, data, isPdf) {
   const fontSize = chart.fontSize;
   const scopes = chart.scopes.filter(scope => scope.type !== "标记");
@@ -311,6 +609,9 @@ export function getChartOption(chart, data, isPdf) {
   let datamin;
   let datamax;
   let markdata = [];
+  let NewxAxis = [];
+  let NewyAxis = [];
+  let Newgrid = [];
 
   if (isChartTypeBarBasic(chart)) {
     const options = chart.scopes.map(scope => getScopeLabel(scope));
@@ -659,12 +960,10 @@ export function getChartOption(chart, data, isPdf) {
           },
           fontSize: 12,
         },
-        data: [{
-          value: data, itemStyle: {
-            color: chart.barColors[index]
-          }
-        }
-        ],
+        data: [data],
+        itemStyle: {
+          color: chart.stackColors[index]
+        },
         markLine: {
           lineStyle: {
             type: "solid",
@@ -676,6 +975,28 @@ export function getChartOption(chart, data, isPdf) {
         },
       })
     })
+  } else if (isChartTypeBarMutiple(chart)) {
+    const options = chart.options;
+    legendData = options;
+    isY = chart.subType === "bar-mutiple-y";
+    const dummyData = isY ? [[42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429,], [66.66666667, 33.33333333, 14.28571429, 42.85714286, 55.32762, 14.28571429, 14.28571429, 42.85714286, 14.28571429,], [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286, 14.28571429,], [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286, 14.28571429,]] : [[42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286,], [66.66666667, 33.33333333, 14.28571429, 42.85714286, 55.32762, 14.28571429, 14.28571429, 42.85714286,], [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286,]]
+    data = data.length !== 0 ? data : dummyData;
+
+    data = getDefaultData(chart, data);
+    let x3data = chart.scopes.map((scope) => getScopeLabel(scope));
+    let x2data = chart.scopes.map((scope) => getScopeArea(scope));
+    let xdata = chart.scopes.map((scope) => getScopeText(scope));
+    let length0 = xdata.length;
+    let length1 = x2data.length;
+    let length2 = x3data.length;
+    const transposedData = Setting.transpose2dArray(data);
+    // eslint-disable-next-line no-unused-vars
+    NewxAxis = xAxisprocess(length0, length1, length2, xdata, isY);
+    // eslint-disable-next-line no-unused-vars
+    NewyAxis = yAxisprocess(length0, length1, length2);
+    // eslint-disable-next-line no-unused-vars
+    Newgrid = isY ? ygridbottomprocess(length0, length1, length2) : xgridbottomprocess(length0, length1, length2);
+    series = seriesprocess(length0, length1, length2, transposedData, options, xdata, x2data, x3data, isY);
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
@@ -783,14 +1104,14 @@ export function getChartOption(chart, data, isPdf) {
 
   const option = {
     color: chart.barColors,
-    grid: isChartTypeCompositePie(chart) ? {} : {
+    grid: isChartTypeCompositePie(chart) ? {} : isChartTypeBarMutiple(chart) ? Newgrid : {
       // top: "30%",
       right: isChartTypeBarFull(chart) ? "5%" : isChartTypeBarVertical(chart) ? "10%" : isChartTypeBarTypical(chart) ? "10%" : isChartTypeBoxplot2(chart) ? "10%" : "5%",
       containLabel: true,
-      top: chart.title !== "" ? 30 : 10,
+      top: chart.title !== "" ? 30 : 25,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : isChartTypeBoxplot2(chart) ? 20 : 40,
     },
-    title: isChartTypeCompositePie(chart) ?{}:{
+    title: isChartTypeCompositePie(chart) ? {} : isChartTypeBarMutiple(chart) ? {} : {
       text: chart.title,
       // text: getOptionLength(chart),
       x: "center",
@@ -812,8 +1133,10 @@ export function getChartOption(chart, data, isPdf) {
           return toFixed(params.value);
         } else if (isChartTypeBoxplot2(chart)) {
           return toFixed(params.value);
-        } else if(isChartTypeCompositePie(chart)){
+        } else if (isChartTypeCompositePie(chart)) {
           return toFixed(params.value);
+        } else if (isChartTypeBarMutiple(chart)) {
+          return toFixed(params.value) + "%";
         }
         else {
           if (chart.subType === "bar-full-y") {
@@ -839,11 +1162,19 @@ export function getChartOption(chart, data, isPdf) {
     //   y: "center",
     // },
     legend: {
+      show: true,
       data: legendData,
       // top: "10%",
-      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : isChartTypeRadar(chart) ? "vertical" : isChartTypeCompositePie(chart) ? "vertical" : "horizontal",
-      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : isChartTypeRadar(chart) ? "right" : isChartTypeCompositePie(chart) ? "right" : "center",
-      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : isChartTypeRadar(chart) ? "center" : isChartTypeCompositePie(chart) ? "center" : "bottom",
+      orient: isChartTypeBarBasic(chart) ? "horizontal" : isChartTypePieBasic(chart) ? "vertical" : isChartTypeBarVertical(chart) ? "vertical" : isChartTypeBarTypical(chart) ? "vertical" : isChartTypeRadar(chart) ? "vertical" : isChartTypeCompositePie(chart) ? "vertical" : isChartTypeBarMutiple(chart) ? (isY ? "horizontal" : "vertical") : "horizontal",
+      x: isChartTypeBarBasic(chart) ? "center" : isChartTypePieBasic(chart) ? "right" : isChartTypeBarVertical(chart) ? "right" : isChartTypeBarTypical(chart) ? "right" : isChartTypeRadar(chart) ? "right" : isChartTypeCompositePie(chart) ? "right" : isChartTypeBarMutiple(chart) ? (isY ? "center" : "right") : "center",
+      y: isChartTypeBarBasic(chart) ? "bottom" : isChartTypePieBasic(chart) ? "center" : isChartTypeBarVertical(chart) ? "center" : isChartTypeBarTypical(chart) ? "center" : isChartTypeRadar(chart) ? "center" : isChartTypeCompositePie(chart) ? "center" : isChartTypeBarMutiple(chart) ? (isY ? "top" : "center") : "bottom",
+      itemGap: isChartTypeBarMutiple(chart) ? 0 : 0,
+      itemWidth: isChartTypeBarMutiple(chart) ? 10 : 10,
+      itemHeight: isChartTypeBarMutiple(chart) ? 10 : 10,
+      textStyle: isChartTypeBarMutiple(chart) ? {
+        fontSize: 10,
+      } : null,
+      align: isChartTypeBarMutiple(chart) ? 'left' : 'left',
     },
     radar: !isChartTypeRadar(chart) ? null : {
       name: {
@@ -854,7 +1185,7 @@ export function getChartOption(chart, data, isPdf) {
       radius: '88%',
       indicator: indicatorData,
     },
-    xAxis: {
+    xAxis: isChartTypeBarMutiple(chart) ? NewyAxis : {
       show: isChartTypeCompositePie(chart) ? false : true,
       name: isChartTypeBarBasic(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarVertical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBarTypical(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot(chart) ? chart.scopes[0].text.split("").join("\n\n") : isChartTypeBoxplot2(chart) ? chart.scopes[0].text.split("").join("\n\n") : null,
       nameLocation: "middle",
@@ -885,7 +1216,7 @@ export function getChartOption(chart, data, isPdf) {
       interval: isChartTypeBarBasic(chart) ? 1 : isChartTypeBarVertical(chart) ? 20 : isChartTypeBarTypical(chart) ? 10 : isChartTypeBoxplot(chart) ? 50 : isChartTypeBoxplot2(chart) ? null : isChartTypeCompositePie(chart) ? null : 10,
       splitNumber: isChartTypeBoxplot2(chart) ? 13 : null,
     },
-    yAxis: [{
+    yAxis: isChartTypeBarMutiple(chart) ? NewxAxis : [{
       show: isChartTypeCompositePie(chart) ? false : true,
       data: isChartTypeCompositePie(chart) ? ['其它'] : yData,
       name: isChartTypeBarTypical(chart) ? chart.datatype : null,
@@ -895,7 +1226,7 @@ export function getChartOption(chart, data, isPdf) {
       nameTextStyle: {
         fontSize: isChartTypeBarTypical(chart) ? 13 : null,
       },
-      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : isChartTypeBoxplot2(chart) ? (chart.order === "down-right") : isChartTypeCompositePie(chart) ? null : ((chart.order !== "down-right")),
+      inverse: isChartTypeBarY(chart) ? (chart.order === "down-right") : isChartTypeBarVertical(chart) ? (chart.order === "down-right") : isChartTypeBarTypical(chart) ? (chart.order === "down-right") : isChartTypeBoxplot(chart) ? (chart.order === "down-right") : isChartTypeBoxplot2(chart) ? (chart.order === "down-right") : isChartTypeCompositePie(chart) ? (chart.order === "down-right") : ((chart.order !== "down-right")),
       axisLabel: isChartTypeCompositePie(chart) ? null : {
         show: true,
         fontSize: fontSize,
@@ -1567,7 +1898,7 @@ class Chart extends React.Component {
               "askId": 395
             },
           ];
-          chart.barColors = [
+          chart.stackColors = [
             "rgb(0,191,255)",
             "black",
             "pink",
@@ -1591,6 +1922,105 @@ class Chart extends React.Component {
           });
         };
         break;
+      case 7: {
+        const chart = this.props.chart;
+        chart.type = 'bar';
+        chart.subType = 'bar-mutiple-y';
+        chart.scopes = [
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "濮阳县",
+            "text": " ",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "学校地域",
+            "text": "县镇",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "学校地域",
+            "text": "农村",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "郊区地域",
+            "text": "市区",
+            "askId": 395
+          }
+        ];
+        chart.options = ['其他',
+          '通过互联网自己学习',
+          '自己阅读期刊、杂志、书本学习',
+          '参加远程继续教育学习（非学历教育）',
+          '参加全国性的教师竞赛（如基本功大赛、名师赛等）',
+          '参加省级或国家级的进修培训',
+          '参加市教育部门组织的进修培训',
+          '参加乡镇或县级教育部门组织的进修培训',
+          '参加学校或学区组织的教研活动'
+        ]
+        this.setState({
+          chart,
+        });
+      };
+        break;
+      // eslint-disable-next-line no-fallthrough
+      case 8: {
+        const chart = this.props.chart;
+        chart.type = 'bar';
+        chart.subType = 'bar-mutiple-x';
+        chart.scopes = [
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "濮阳县",
+            "text": " ",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "学校地域",
+            "text": "县镇",
+            "askId": 395
+          },
+          {
+            "id": 0,
+            "type": "默认",
+            "range": "四年级",
+            "area": "学校地域",
+            "text": "农村",
+            "askId": 395
+          },
+        ];
+        chart.options = ['给了我展示体育才能的舞台，满足了我对体育的兴趣',
+          '学习到更多的体育知识',
+          '我得到了更多了解我的同学朋友，与他们共同玩耍交流的机会',
+          '我可以接触到更多的体育器材',
+          '可以学会更多的体育活动',
+          '对我上好的中学有用',
+          '可以让我心情更愉快',
+          '对我没什么用',
+        ]
+        this.setState({
+          chart,
+        });
+      }
+        break;
+      // eslint-disable-next-line no-fallthrough
       default:
         alert("请选择正确的图例");
     }
