@@ -1,9 +1,14 @@
 import React from "react";
 import ReactEcharts from 'echarts-for-react';
 import * as Setting from "./Setting";
-import { Select } from 'antd';
+import {
+  Select
+} from 'antd';
 import * as dataTool from "../node_modules/echarts/dist/extension/dataTool.js"
-const { Option } = Select;
+const {
+  Option
+} = Select;
+
 function getScopeId(scope) {
   return scope.text;
 }
@@ -38,14 +43,18 @@ function CompositePieDataProcess(legendData, data, othersum, chart) {
   for (var i = 0; i <= legendData.length - 4; i++) {
     if (i !== legendData.length - 4) {
       var item = {
-        value: data[i], name: legendData[i], itemStyle: {
+        value: data[i],
+        name: legendData[i],
+        itemStyle: {
           color: chart.pieColors[i]
         }
       };
       res.push(item);
     } else {
       var otheritem = {
-        value: othersum, name: "其它", itemStyle: {
+        value: othersum,
+        name: "其它",
+        itemStyle: {
           color: chart.pieColors[i]
         }
       };
@@ -69,14 +78,14 @@ function Processcompositepie(data, lengend) {
 }
 
 function getMarkLineData(percent, height, width, otherdata) {
-  let x0 = width * 0.2
-    ; // 圆心x轴坐标
+  let x0 = width * 0.2; // 圆心x轴坐标
   let x1 = x0 + (height * 0.45) * Math.cos((45 * 3.14) / 180);
   let y1 = height * 0.5 - (height * 0.45) * Math.sin((45 * 3.14) / 180); //先定死起始点坐标
   let ao = 360 * (percent / 100); // 扇形角度
   let ao1 = 0; // 用来计算的坐标角度
   ao1 = ao <= 45 ? 45 - ao : 360 - (ao - 45);
-  let x2 = 0, y2 = 0;
+  let x2 = 0,
+    y2 = 0;
   x2 = x0 + (height * 0.45) * Math.cos((ao1 * 3.14) / 180);
   y2 = height * 0.5 - (height * 0.45) * Math.sin((ao1 * 3.14) / 180);
   console.log(y2)
@@ -105,7 +114,10 @@ function getMarkLineData(percent, height, width, otherdata) {
 function PieDataProcess(legendData, data) {
   let res = [];
   for (var i = 0; i < legendData.length; i++) {
-    var item = { value: data[i], name: legendData[i] };
+    var item = {
+      value: data[i],
+      name: legendData[i]
+    };
     res.push(item);
   }
   return res
@@ -130,9 +142,14 @@ function toMax(yAxisData) {
 function getindicatorData(indicatorname) {
   let res = [];
   indicatorname.forEach(value => {
-    res.push({ name: value, max: 100 });
+    res.push({
+      name: value,
+      max: 100
+    });
   });
-  res[0].axisLabel = { show: true };
+  res[0].axisLabel = {
+    show: true
+  };
   return res;
 }
 
@@ -440,68 +457,67 @@ function seriesprocess(length0, length1, length2, Data, option, xdata, x2data, x
   if (length1 !== 0) {
     let resultObj = DuplicateRemoval(x2data).obj;
     for (var key in resultObj) {
-      series.push(
-        {
-          data: [{
-            name: key,
-            value: 1,
-          }],
-          label: {
-            show: true,
-            position: 'inside',
-            formatter: '{b}',
-            offset: isY ? [0, 7] : [0, -5],
-            fontSize: 10,
-            color: 'black',
-            rotate: isY ? null : 90,
-          },
-          type: 'bar',
-          barGap: 0,
-          // eslint-disable-next-line no-loop-func
-          barWidth: (function () {
-            return `${(100 / (xdata.length)) * resultObj[key]}%`;
-          })(),
-          itemStyle: {
-            color: "rgba(255, 255, 255, 1)",
-            borderColor: 'gray',
-            borderWidth: 0.1,
-          },
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-        })
+      series.push({
+        data: [{
+          name: key,
+          value: 1,
+        }],
+        label: {
+          show: true,
+          position: 'inside',
+          formatter: '{b}',
+          offset: isY ? [0, 7] : [0, -5],
+          fontSize: 10,
+          color: 'black',
+          rotate: isY ? null : 90,
+        },
+        type: 'bar',
+        barGap: 0,
+        // eslint-disable-next-line no-loop-func
+        barWidth: (function () {
+          return `${(100 / (xdata.length)) * resultObj[key]}%`;
+        })(),
+        itemStyle: {
+          color: "rgba(255, 255, 255, 1)",
+          borderColor: 'gray',
+          borderWidth: 0.1,
+        },
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+      })
     }
   }
   if (length2 !== 0) {
     let resultObj = DuplicateRemoval(x3data).obj;
     for (key in resultObj) {
-      series.push(
-        {
-          data: [{
-            name: key,
-            value: 1,
-          }],
-          label: {
-            show: true,
-            position: 'inside',
-            formatter: '{b}',
-            offset: [0, 1],
-            fontSize: 10,
-            color: 'black',
-            rotate: isY ? null : 90,
-          },
-          type: 'bar',
-          barGap: 0,
-          // eslint-disable-next-line no-loop-func
-          barWidth: (function () { return `${(100 / (xdata.length)) * resultObj[key]}%`; })(),
-          itemStyle: {
-            color: "rgba(255, 255, 255, 1)",
-            borderColor: 'gray',
-            borderWidth: 0.1,
-          },
-          xAxisIndex: 2,
-          yAxisIndex: 2,
+      series.push({
+        data: [{
+          name: key,
+          value: 1,
+        }],
+        label: {
+          show: true,
+          position: 'inside',
+          formatter: '{b}',
+          offset: [0, 1],
+          fontSize: 10,
+          color: 'black',
+          rotate: isY ? null : 90,
         },
-      )
+        type: 'bar',
+        barGap: 0,
+        // eslint-disable-next-line no-loop-func
+        barWidth: (function () {
+          return `${(100 / (xdata.length)) * resultObj[key]}%`;
+        })(),
+        itemStyle: {
+          color: "rgba(255, 255, 255, 1)",
+          borderColor: 'gray',
+          borderWidth: 0.1,
+        },
+        xAxisIndex: 2,
+        yAxisIndex: 2,
+      })
     }
   }
   return series;
@@ -619,34 +635,39 @@ export function getChartOption(chart, data, isPdf) {
     yData = options;
     data = data.length !== 0 ? data.map(row => row[0]) : Setting.randomsBetween(2, 5, chart.scopes.length);
     data = getDefaultData(chart, data);
-    series.push(
-      {
-        name: '百分比',
-        type: 'bar',
-        barWidth: 50,
-        label: {
-          show: true,
-          position: isY ? "top" : "right",
-          // formatter: '{c}%',
-          formatter: function (params) {
-            // return `${params.value}`;
-            if (params.value < 0) {
-              return "你在本题上没有作答";
-            } else if (params.value === 0) {
-              return "贵校在该题上缺乏有效数据";
-            }
-            return toFixed(params.value);
-          },
-          color: "#000000",
+    series.push({
+      name: '百分比',
+      type: 'bar',
+      barWidth: 50,
+      label: {
+        show: true,
+        position: isY ? "top" : "right",
+        // formatter: '{c}%',
+        formatter: function (params) {
+          // return `${params.value}`;
+          if (params.value < 0) {
+            return "你在本题上没有作答";
+          } else if (params.value === 0) {
+            return "贵校在该题上缺乏有效数据";
+          }
+          return toFixed(params.value);
         },
-        data: data,
-      }
-    );
+        color: "#000000",
+      },
+      data: data,
+    });
   } else if (isChartTypePieBasic(chart)) {
     const options = chart.scopes.map((scope) => getScopeLabel(scope));
     ispie = chart.subType === "pie-basic-simple";
     legendData = options;
-    data = data.length !== 0 ? data.map((row) => row[0]) : [[0.03], [0.2994], [0.32845], [0.2001], [0.083314], [0.060899]].map((row) => row[0]);
+    data = data.length !== 0 ? data.map((row) => row[0]) : [
+      [0.03],
+      [0.2994],
+      [0.32845],
+      [0.2001],
+      [0.083314],
+      [0.060899]
+    ].map((row) => row[0]);
     data = getDefaultData(chart, data);
     data = PieDataProcess(legendData, data);
     series.push({
@@ -680,32 +701,33 @@ export function getChartOption(chart, data, isPdf) {
     });
     isY = chart.subType === "bar-vertical-y";
     yData = uniqueRanges;
-    data = data.length !== 0 ? data : [[30.5, 45.7], [69.5, 54.3]];
+    data = data.length !== 0 ? data : [
+      [30.5, 45.7],
+      [69.5, 54.3]
+    ];
     data = getDefaultData(chart, data);
     legendData = options;
     const transposedData = Setting.transpose2dArray(data);
     options.forEach((option, i) => {
-      series.push(
-        {
-          name: option,
-          type: 'bar',
-          barGap: 0,
-          label: {
-            show: true,
-            position: isY ? "top" : "right",
-            formatter: function (params) {
-              if (params.value < 0) {
-                return "你在本题上没有作答";
-              } else if (params.value === 0) {
-                return "贵校在该题上缺乏有效数据";
-              }
-              return toFixed(params.value);
-            },
-            color: "#000000",
+      series.push({
+        name: option,
+        type: 'bar',
+        barGap: 0,
+        label: {
+          show: true,
+          position: isY ? "top" : "right",
+          formatter: function (params) {
+            if (params.value < 0) {
+              return "你在本题上没有作答";
+            } else if (params.value === 0) {
+              return "贵校在该题上缺乏有效数据";
+            }
+            return toFixed(params.value);
           },
-          data: transposedData[i],
-        }
-      );
+          color: "#000000",
+        },
+        data: transposedData[i],
+      });
     });
   } else if (isChartTypeBarTypical(chart)) {
     const options = chart.options;
@@ -715,40 +737,39 @@ export function getChartOption(chart, data, isPdf) {
     });
     isY = chart.subType === "bar-typical-y";
     yData = uniqueRanges;
-    data = data.length !== 0 ? data : [[0.07560, 0.09690],
-    [0.05380, 0.06140],
-    [0.17320, 0.16030],
-    [0.21420, 0.24030],
-    [0.24180, 0.23310],
-    [0.19350, 0.16990],
-    [0.04790, 0.03440]
+    data = data.length !== 0 ? data : [
+      [0.07560, 0.09690],
+      [0.05380, 0.06140],
+      [0.17320, 0.16030],
+      [0.21420, 0.24030],
+      [0.24180, 0.23310],
+      [0.19350, 0.16990],
+      [0.04790, 0.03440]
     ];
     data = getDefaultData(chart, data);
     data = get100Times(data)
     legendData = options;
     const transposedData = Setting.transpose2dArray(data);
     options.forEach((option, i) => {
-      series.push(
-        {
-          name: option,
-          type: 'bar',
-          barGap: 0,
-          label: {
-            show: true,
-            position: isY ? "top" : "right",
-            formatter: function (params) {
-              if (params.value < 0) {
-                return "你在本题上没有作答";
-              } else if (params.value === 0) {
-                return "贵校在该题上缺乏有效数据";
-              }
-              return toFixed(params.value);
-            },
-            color: "#000000",
+      series.push({
+        name: option,
+        type: 'bar',
+        barGap: 0,
+        label: {
+          show: true,
+          position: isY ? "top" : "right",
+          formatter: function (params) {
+            if (params.value < 0) {
+              return "你在本题上没有作答";
+            } else if (params.value === 0) {
+              return "贵校在该题上缺乏有效数据";
+            }
+            return toFixed(params.value);
           },
-          data: transposedData[i],
-        }
-      );
+          color: "#000000",
+        },
+        data: transposedData[i],
+      });
     });
   } else if (isChartTypeRadar(chart)) {
     const options = chart.options;
@@ -758,53 +779,55 @@ export function getChartOption(chart, data, isPdf) {
     });
     isradar = chart.subType === "radar";
     legendData = options
-    data = data.length !== 0 ? data.map((row) => row[0]) : [[30, 33, 55],
-    [35, 38, 65],
-    [45, 49, 50],
-    [55, 51, 66],
-    [60, 67, 69],
-    [65, 78, 78],
-    [70, 90, 94],
-    [75, 75, 85]
+    data = data.length !== 0 ? data.map((row) => row[0]) : [
+      [30, 33, 55],
+      [35, 38, 65],
+      [45, 49, 50],
+      [55, 51, 66],
+      [60, 67, 69],
+      [65, 78, 78],
+      [70, 90, 94],
+      [75, 75, 85]
     ];
     data = getDefaultData(chart, data);
     indicatorData = getindicatorData(uniqueRanges);
     const transposedData = Setting.transpose2dArray(data);
     console.log(transposedData)
     options.forEach((option, i) => {
-      series.push(
-        {
-          type: "radar",
-          data: [{
-            name: option,
-            value: transposedData[i]
-          }]
-        })
-    }
-    );
+      series.push({
+        type: "radar",
+        data: [{
+          name: option,
+          value: transposedData[i]
+        }]
+      })
+    });
   } else if (isChartTypeBoxplot(chart)) {
     const options = chart.scopes.map((scope) => getScopeLabel(scope));
     isY = chart.subType === "boxplot-basic-y";
     yData = options;
     data =
-      data.length !== 0
-        ? data.map((row) => row[0])
-        : [[446.4429432,
-          512.8455151,
-          381.1205591,
-          346.2006511,
-          645.2008944
-        ], [422.1927263,
-          525.5307233,
-          492.2898466,
-          356.5856599,
-          658.8386935
-        ], [422.1927263,
-          520.6919662,
-          339.5552561,
-          309.3014429,
-          663.3666584,
-        ]];
+      data.length !== 0 ?
+        data.map((row) => row[0]) : [
+          [446.4429432,
+            512.8455151,
+            381.1205591,
+            346.2006511,
+            645.2008944
+          ],
+          [422.1927263,
+            525.5307233,
+            492.2898466,
+            356.5856599,
+            658.8386935
+          ],
+          [422.1927263,
+            520.6919662,
+            339.5552561,
+            309.3014429,
+            663.3666584,
+          ]
+        ];
     data = getDefaultData(chart, data);
     data = dataTool.prepareBoxplotData(data);
     console.log(data);
@@ -821,9 +844,11 @@ export function getChartOption(chart, data, isPdf) {
             x2: 0,
             y2: 1,
             colorStops: [{
-              offset: 1 - percent, color: 'red' // 0% 处的颜色
+              offset: 1 - percent,
+              color: 'red' // 0% 处的颜色
             }, {
-              offset: 1 - percent, color: 'blue' // 100% 处的颜色
+              offset: 1 - percent,
+              color: 'blue' // 100% 处的颜色
             }]
           }
         },
@@ -841,7 +866,11 @@ export function getChartOption(chart, data, isPdf) {
     });
     isY = chart.subType === "boxplot2-basic-y";
     yData = uniqueRanges;
-    data = data.length !== 0 ? data : [[72.22], [42.86, 76.93, 80.74, 86.18, 100.00], [46.68, 50.91, 56.89, 62.35, 69.98]];
+    data = data.length !== 0 ? data : [
+      [72.22],
+      [42.86, 76.93, 80.74, 86.18, 100.00],
+      [46.68, 50.91, 56.89, 62.35, 69.98]
+    ];
     data = getDefaultData(chart, data);
     let yAxisData = data.flat();
     datamax = toMax(yAxisData);
@@ -903,7 +932,18 @@ export function getChartOption(chart, data, isPdf) {
     const options = chart.scopes.map((scope) => getScopeLabel(scope));
     isY = chart.subType === "compositepie";
     legendData = options;
-    data = data.length !== 0 ? data.map((row) => row[0]) : [[7.672883918], [11.98304674], [0.240770104], [7.291883219], [4.275029987], [3.846806493], [9.708357257], [35.76251798], [18.51224522], [0.706459077]].map((row) => row[0]);
+    data = data.length !== 0 ? data.map((row) => row[0]) : [
+      [7.672883918],
+      [11.98304674],
+      [0.240770104],
+      [7.291883219],
+      [4.275029987],
+      [3.846806493],
+      [9.708357257],
+      [35.76251798],
+      [18.51224522],
+      [0.706459077]
+    ].map((row) => row[0]);
     let endData = Processcompositepie(data, legendData)
     let sum = PieDataSum(data);
     let other = otherPercent(data, sum);
@@ -979,7 +1019,16 @@ export function getChartOption(chart, data, isPdf) {
     const options = chart.options;
     legendData = options;
     isY = chart.subType === "bar-mutiple-y";
-    const dummyData = isY ? [[42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429,], [66.66666667, 33.33333333, 14.28571429, 42.85714286, 55.32762, 14.28571429, 14.28571429, 42.85714286, 14.28571429,], [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286, 14.28571429,], [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286, 14.28571429,]] : [[42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286,], [66.66666667, 33.33333333, 14.28571429, 42.85714286, 55.32762, 14.28571429, 14.28571429, 42.85714286,], [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286,]]
+    const dummyData = isY ? [
+      [42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429,],
+      [66.66666667, 33.33333333, 14.28571429, 42.85714286, 55.32762, 14.28571429, 14.28571429, 42.85714286, 14.28571429,],
+      [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286, 14.28571429,],
+      [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286, 14.28571429,]
+    ] : [
+      [42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286, 14.28571429, 42.85714286, 42.85714286,],
+      [66.66666667, 33.33333333, 14.28571429, 42.85714286, 55.32762, 14.28571429, 14.28571429, 42.85714286,],
+      [31.26223, 53.33333333, 14.28571429, 42.85714286, 35.32762, 14.28571429, 81.28571429, 42.85714286,]
+    ]
     data = data.length !== 0 ? data : dummyData;
 
     data = getDefaultData(chart, data);
@@ -1000,7 +1049,32 @@ export function getChartOption(chart, data, isPdf) {
   } else if (isChartTypeBarFull(chart)) {
     const options = chart.options;
     isY = chart.subType === "bar-full-y";
-    const dummyData = isY ? [[0.38, 0.62], [0.32, 0.68]] : [[0, 0, 0, 1, 0], [0, 0, 0, 1, 0], [1, 0, 0], [0, 0.04979, 0.06649, 0.28361, 0.60011], [0.01754, 0.03319, 0.10494, 0.19853, 0.6458], [0.70095, 0.21471, 0.08435], [0.03627, 0.05651, 0.13136, 0.21623, 0.55964], [0.03974, 0.06579, 0.15573, 0.20702, 0.53173], [0.56695, 0.28612, 0.14693], [0, 0.04979, 0.06649, 0.28361, 0.60011], [0.01754, 0.03319, 0.10494, 0.19853, 0.6458], [0.70095, 0.21471, 0.08435], [0.03627, 0.05651, 0.13136, 0.21623, 0.55964], [0.03974, 0.06579, 0.15573, 0.20702, 0.53173], [0.56695, 0.28612, 0.14693], [0, 0.04979, 0.06649, 0.28361, 0.60011], [0.01754, 0.03319, 0.10494, 0.19853, 0.6458], [0.70095, 0.21471, 0.08435], [0.03627, 0.05651, 0.13136, 0.21623, 0.55964], [0.03974, 0.06579, 0.15573, 0.20702, 0.53173], [0.56695, 0.28612, 0.14693]];
+    const dummyData = isY ? [
+      [0.38, 0.62],
+      [0.32, 0.68]
+    ] : [
+      [0, 0, 0, 1, 0],
+      [0, 0, 0, 1, 0],
+      [1, 0, 0],
+      [0, 0.04979, 0.06649, 0.28361, 0.60011],
+      [0.01754, 0.03319, 0.10494, 0.19853, 0.6458],
+      [0.70095, 0.21471, 0.08435],
+      [0.03627, 0.05651, 0.13136, 0.21623, 0.55964],
+      [0.03974, 0.06579, 0.15573, 0.20702, 0.53173],
+      [0.56695, 0.28612, 0.14693],
+      [0, 0.04979, 0.06649, 0.28361, 0.60011],
+      [0.01754, 0.03319, 0.10494, 0.19853, 0.6458],
+      [0.70095, 0.21471, 0.08435],
+      [0.03627, 0.05651, 0.13136, 0.21623, 0.55964],
+      [0.03974, 0.06579, 0.15573, 0.20702, 0.53173],
+      [0.56695, 0.28612, 0.14693],
+      [0, 0.04979, 0.06649, 0.28361, 0.60011],
+      [0.01754, 0.03319, 0.10494, 0.19853, 0.6458],
+      [0.70095, 0.21471, 0.08435],
+      [0.03627, 0.05651, 0.13136, 0.21623, 0.55964],
+      [0.03974, 0.06579, 0.15573, 0.20702, 0.53173],
+      [0.56695, 0.28612, 0.14693]
+    ];
     data = data.length !== 0 ? data : dummyData;
     const markPoints = isY ? getMarkPointsForBarFullY(chart, data) : getMarkPointsForBarFullX(chart, data);
     data = getDefaultData(chart, data);
@@ -1012,31 +1086,29 @@ export function getChartOption(chart, data, isPdf) {
         return ranges.indexOf(range) === i;
       });
       const offset = getMaxScopeLength(chart, fontSize);
-      yAxisNew.push(
-        {
-          position: 'left',
-          offset: offset,
-          axisLine: {
-            show: false,
+      yAxisNew.push({
+        position: 'left',
+        offset: offset,
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          length: offset,
+          inside: true,
+          lineStyle: {
+            color: "rgb(217,217,217)",
+          }
+        },
+        axisLabel: {
+          inside: true,
+          fontSize: fontSize,
+          formatter: function (value) {
+            return value.split("").join("\n")
           },
-          axisTick: {
-            length: offset,
-            inside: true,
-            lineStyle: {
-              color: "rgb(217,217,217)",
-            }
-          },
-          axisLabel: {
-            inside: true,
-            fontSize: fontSize,
-            formatter: function (value) {
-              return value.split("").join("\n")
-            },
-          },
-          inverse: true,
-          data: uniqueRanges,
-        }
-      );
+        },
+        inverse: true,
+        data: uniqueRanges,
+      });
     }
     yData = scopes.map(scope => {
       if (chart.subType === "bar-full-x") {
@@ -1050,38 +1122,38 @@ export function getChartOption(chart, data, isPdf) {
     }
     const transposedData = Setting.transpose2dArray(data);
     options.forEach((option, i) => {
-      series.push(
-        {
-          name: option,
-          stack: "all",
-          type: 'bar',
-          barWidth: chart.subType === "bar-full-x" ? 20 : 100,
-          barGap: '80%', /*多个并排柱子设置柱子之间的间距*/
-          barCategoryGap: '50%', /*多个并排柱子设置柱子之间的间距*/
-          label: {
-            show: isPdf,
-            position: 'inside',
-            // formatter: '{c}%',
-            formatter: function (params) {
-              if (params.value < 5) {
-                return "";
-              }
-              return toPercent(params.value) + "%";
-            },
+      series.push({
+        name: option,
+        stack: "all",
+        type: 'bar',
+        barWidth: chart.subType === "bar-full-x" ? 20 : 100,
+        barGap: '80%',
+        /*多个并排柱子设置柱子之间的间距*/
+        barCategoryGap: '50%',
+        /*多个并排柱子设置柱子之间的间距*/
+        label: {
+          show: isPdf,
+          position: 'inside',
+          // formatter: '{c}%',
+          formatter: function (params) {
+            if (params.value < 5) {
+              return "";
+            }
+            return toPercent(params.value) + "%";
           },
-          data: transposedData[i],
-          markPoint: {
-            symbolSize: 35,
-            data: markPoints,
-            // data: [
-            //   {name: '年最低', value: "我", xAxis: 20, yAxis: 4}
-            // ]
-            itemStyle: {
-              color: chart.colorPin,
-            },
+        },
+        data: transposedData[i],
+        markPoint: {
+          symbolSize: 35,
+          data: markPoints,
+          // data: [
+          //   {name: '年最低', value: "我", xAxis: 20, yAxis: 4}
+          // ]
+          itemStyle: {
+            color: chart.colorPin,
           },
-        }
-      );
+        },
+      });
     });
 
     if (chart.subType === "bar-full-y") {
@@ -1111,7 +1183,7 @@ export function getChartOption(chart, data, isPdf) {
       top: chart.title !== "" ? 30 : 25,
       bottom: (chart.subType === "bar-full-x" && getOptionLength(chart) > 40) ? 60 : isChartTypeBoxplot2(chart) ? 20 : 40,
     },
-    title: isChartTypeCompositePie(chart) ? {} : isChartTypeBarMutiple(chart) ? {} : {
+    title: isChartTypePieBasic(chart) ? {} : isChartTypeCompositePie(chart) ? {} : isChartTypeBarMutiple(chart) ? {} : isChartTypeRadar(chart) ? {} : isChartTypeBarBasic(chart) ? {} : isChartTypeBarVertical(chart) ? {} : isChartTypeBarVertical(chart) ? {} : isChartTypeBarTypical(chart) ? {} : isChartTypeBoxplot(chart) ? {} : {
       text: chart.title,
       // text: getOptionLength(chart),
       x: "center",
@@ -1137,8 +1209,9 @@ export function getChartOption(chart, data, isPdf) {
           return toFixed(params.value);
         } else if (isChartTypeBarMutiple(chart)) {
           return toFixed(params.value) + "%";
-        }
-        else {
+        } else if (isChartTypeBoxplot(chart)) {
+          return toFixed(params.value);
+        } else {
           if (chart.subType === "bar-full-y") {
             return toPercent(params.value) + "%";
           } else {
@@ -1297,211 +1370,206 @@ class Chart extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      classes: props,//数据源
+      classes: props, //数据源
     };
     // console.log(props);
     this.handleChange = this.handleChange.bind(this);
   }
   handleChange(value) {
     switch (parseInt(value)) {
-      case 0:
+      case 0: {
+        const chart = this.props.chart;
+        chart.type = 'pie';
+        chart.subType = 'pie-basic-simple';
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "几乎没有",
+          "text": "自主学习力",
+          "askId": 395
+        },
         {
-          const chart = this.props.chart;
-          chart.type = 'pie';
-          chart.subType = 'pie-basic-simple';
-          chart.scopes = [
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "几乎没有",
-              "text": "自主学习力",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "1小时以内",
-              "text": "自主学习力",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "1-2小时",
-              "text": "自主学习力",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "2-3小时",
-              "text": "自主学习力",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "3-4小时",
-              "text": "自主学习力",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "4小时级以上",
-              "text": "自主学习力",
-              "askId": 395
-            }
-          ];
-          this.setState({
-            chart,
-          });
-        };
+          "id": 0,
+          "type": "默认",
+          "range": "1小时以内",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1-2小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2-3小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3-4小时",
+          "text": "自主学习力",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4小时级以上",
+          "text": "自主学习力",
+          "askId": 395
+        }
+        ];
+        this.setState({
+          chart,
+        });
+      };
         break;
-      case 1:
+      case 1: {
+        const chart = this.props.chart;
+        chart.type = 'bar';
+        chart.subType = 'bar-vertical-y';
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习少",
+          "text": "百分比(%)",
+          "askId": 395
+        },
         {
-          const chart = this.props.chart;
-          chart.type = 'bar';
-          chart.subType = 'bar-vertical-y';
-          chart.scopes = [
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "父母参与子女学习少",
-              "text": "百分比(%)",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "父母参与子女学习少",
-              "text": "百分比(%)",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "父母参与子女学习多",
-              "text": "百分比(%)",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "父母参与子女学习多",
-              "text": "百分比(%)",
-              "askId": 395
-            }
-          ];
-          chart.options = ["四年级", "八年级"]
-          this.setState({
-            chart,
-          });
-        };
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习少",
+          "text": "百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习多",
+          "text": "百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "父母参与子女学习多",
+          "text": "百分比(%)",
+          "askId": 395
+        }
+        ];
+        chart.options = ["四年级", "八年级"]
+        this.setState({
+          chart,
+        });
+      };
         break;
       case 2: {
         const chart = this.props.chart;
         chart.type = 'bar';
         chart.subType = 'bar-typical-y';
-        chart.scopes = [
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "0",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "0",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "1",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "1",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "2",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "2",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "3",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "3",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "4",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "4",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "5",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "5",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "6",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "6",
-            "text": "所占人数百分比(%)",
-            "askId": 395
-          },
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "0",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "0",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "1",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "2",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "3",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "4",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "5",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "5",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "6",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "6",
+          "text": "所占人数百分比(%)",
+          "askId": 395
+        },
         ];
         chart.options = ["本校", "株洲市"];
         chart.datatype = "分值";
@@ -1510,455 +1578,446 @@ class Chart extends React.Component {
         });
       };
         break;
-      case 3:
+      case 3: {
+        const chart = this.props.chart;
+        chart.type = 'radar';
+        chart.subType = 'radar';
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "生活素养",
+          "text": "",
+          "askId": 395
+        },
         {
-          const chart = this.props.chart;
-          chart.type = 'radar';
-          chart.subType = 'radar';
-          chart.scopes = [
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "生活素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "生活素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "生活素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "信息素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "信息素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "信息素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "审美素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "审美素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "审美素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "国际素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "国际素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "国际素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "创新素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "创新素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "创新素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "学习素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "学习素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "学习素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "身心素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "身心素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "身心素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "品德素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "品德素养",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "品德素养",
-              "text": "",
-              "askId": 395
-            },
-          ];
-          chart.options = ["四年级", "八年级", "十一年级"];
-          this.setState({
-            chart,
-          });
-        };
+          "id": 0,
+          "type": "默认",
+          "range": "生活素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "生活素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "信息素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "信息素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "信息素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "审美素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "审美素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "审美素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "国际素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "国际素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "国际素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "创新素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "创新素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "创新素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "学习素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "学习素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "学习素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "身心素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "身心素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "身心素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "品德素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "品德素养",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "品德素养",
+          "text": "",
+          "askId": 395
+        },
+        ];
+        chart.options = ["四年级", "八年级", "十一年级"];
+        this.setState({
+          chart,
+        });
+      };
         break;
-      case 4:
+      case 4: {
+        const chart = this.props.chart;
+        chart.type = 'boxplot';
+        chart.subType = 'boxplot-basic-y';
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "识记",
+          "text": "分数",
+          "askId": 395
+        },
         {
-          const chart = this.props.chart;
-          chart.type = 'boxplot';
-          chart.subType = 'boxplot-basic-y';
-          chart.scopes = [
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "识记",
-              "text": "分数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "理解",
-              "text": "分数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "运用",
-              "text": "分数",
-              "askId": 395
-            }
-          ];
-          this.setState({
-            chart,
-          });
-        };
+          "id": 0,
+          "type": "默认",
+          "range": "理解",
+          "text": "分数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "运用",
+          "text": "分数",
+          "askId": 395
+        }
+        ];
+        this.setState({
+          chart,
+        });
+      };
         break;
-      case 5:
+      case 5: {
+        const chart = this.props.chart;
+        chart.type = 'boxplot2';
+        chart.subType = 'boxplot2-basic-y';
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "本校",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
         {
-          const chart = this.props.chart;
-          chart.type = 'boxplot2';
-          chart.subType = 'boxplot2-basic-y';
-          chart.scopes = [
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本校",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本区",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本区",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本区",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本区",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本区",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本市",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本市",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本市",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本市",
-              "text": "亲子关系指数",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "本市",
-              "text": "亲子关系指数",
-              "askId": 395
-            }
-          ];
-          chart.options = [
-            '95%的学校高于此点',
-            '75%的学校高于此点',
-            '50%的学校高于此点',
-            '25%的学校高于此点',
-            '5%的学校高于此点'
-          ];
-          chart.title = "本校在亲子关系指数上的表现";
-          this.setState({
-            chart,
-          });
-        };
+          "id": 0,
+          "type": "默认",
+          "range": "本区",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本区",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本区",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本区",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本区",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本市",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本市",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本市",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本市",
+          "text": "亲子关系指数",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "本市",
+          "text": "亲子关系指数",
+          "askId": 395
+        }
+        ];
+        chart.options = [
+          '95%的学校高于此点',
+          '75%的学校高于此点',
+          '50%的学校高于此点',
+          '25%的学校高于此点',
+          '5%的学校高于此点'
+        ];
+        chart.title = "本校在亲子关系指数上的表现";
+        this.setState({
+          chart,
+        });
+      };
         break;
-      case 6:
+      case 6: {
+        const chart = this.props.chart;
+        chart.type = 'pie';
+        chart.subType = 'compositepie';
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "不知道",
+          "text": "",
+          "askId": 395
+        },
         {
-          const chart = this.props.chart;
-          chart.type = 'pie';
-          chart.subType = 'compositepie';
-          chart.scopes = [
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "不知道",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "无工作",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "政府机构的高级行政人员",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "企业管理人员",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "教育、医务、科研人员、专业技术人员",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "政府普通工作人员",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "商业服务业人员",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "私营或个体经营者",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "工人",
-              "text": "",
-              "askId": 395
-            },
-            {
-              "id": 0,
-              "type": "默认",
-              "range": "农民，一直在农村种地或做其他事情",
-              "text": "",
-              "askId": 395
-            },
-          ];
-          chart.stackColors = [
-            "rgb(0,191,255)",
-            "black",
-            "pink",
-            "green"
-          ];
-          chart.pieColors = [
-            "rgb(68,114,196)",
-            "rgb(237,125,49)",
-            "rgb(165,165,165)",
-            "rgb(255,192,0)",
-            "rgb(91,155,213)",
-            "rgb(243,98,98)",
-            "rgb(99,217,90)",
-            "rgb(80,109,132)",
-            "rgb(231,158,10)",
-            "rgb(158,102,194)",
-            "rgb(229,30,179)"
-          ];
-          this.setState({
-            chart,
-          });
-        };
+          "id": 0,
+          "type": "默认",
+          "range": "无工作",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "政府机构的高级行政人员",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "企业管理人员",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "教育、医务、科研人员、专业技术人员",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "政府普通工作人员",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "商业服务业人员",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "私营或个体经营者",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "工人",
+          "text": "",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "农民，一直在农村种地或做其他事情",
+          "text": "",
+          "askId": 395
+        },
+        ];
+        chart.stackColors = [
+          "rgb(0,191,255)",
+          "black",
+          "pink",
+          "green"
+        ];
+        chart.pieColors = [
+          "rgb(68,114,196)",
+          "rgb(237,125,49)",
+          "rgb(165,165,165)",
+          "rgb(255,192,0)",
+          "rgb(91,155,213)",
+          "rgb(243,98,98)",
+          "rgb(99,217,90)",
+          "rgb(80,109,132)",
+          "rgb(231,158,10)",
+          "rgb(158,102,194)",
+          "rgb(229,30,179)"
+        ];
+        this.setState({
+          chart,
+        });
+      };
         break;
       case 7: {
         const chart = this.props.chart;
         chart.type = 'bar';
         chart.subType = 'bar-mutiple-y';
-        chart.scopes = [
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "濮阳县",
-            "text": " ",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "学校地域",
-            "text": "县镇",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "学校地域",
-            "text": "农村",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "郊区地域",
-            "text": "市区",
-            "askId": 395
-          }
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "濮阳县",
+          "text": " ",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "学校地域",
+          "text": "县镇",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "学校地域",
+          "text": "农村",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "郊区地域",
+          "text": "市区",
+          "askId": 395
+        }
         ];
         chart.options = ['其他',
           '通过互联网自己学习',
@@ -1980,31 +2039,30 @@ class Chart extends React.Component {
         const chart = this.props.chart;
         chart.type = 'bar';
         chart.subType = 'bar-mutiple-x';
-        chart.scopes = [
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "濮阳县",
-            "text": " ",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "学校地域",
-            "text": "县镇",
-            "askId": 395
-          },
-          {
-            "id": 0,
-            "type": "默认",
-            "range": "四年级",
-            "area": "学校地域",
-            "text": "农村",
-            "askId": 395
-          },
+        chart.scopes = [{
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "濮阳县",
+          "text": " ",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "学校地域",
+          "text": "县镇",
+          "askId": 395
+        },
+        {
+          "id": 0,
+          "type": "默认",
+          "range": "四年级",
+          "area": "学校地域",
+          "text": "农村",
+          "askId": 395
+        },
         ];
         chart.options = ['给了我展示体育才能的舞台，满足了我对体育的兴趣',
           '学习到更多的体育知识',
@@ -2031,66 +2089,91 @@ class Chart extends React.Component {
       return null;
     }
 
-    return (
-      <div style={{ marginBottom: "20px" }}>
-        服务器回传数据：
+    return (<
+      div style={
         {
-          JSON.stringify(this.props.data)
+          marginBottom: "20px"
         }
-      </div>
-    )
+      } >
+      服务器回传数据： {
+        JSON.stringify(this.props.data)
+      } <
+      /div>
+      )
   }
 
-  onEvents = {
-    'select': this.handleChange
+      onEvents = {
+        'select': this.handleChange
   }
-  renderChart(chart, data) {
+      renderChart(chart, data) {
     if (chart.scopes.length === 0) {
       return Setting.wrapError("请至少添加一个范围");
     }
 
-    if (chart.type === "text") {
-      return (
-        <div>
-          {
-            this.renderData()
-          }
-          {
-            getChartText(chart, data)
-          }
-        </div>
-      )
-    }
-    console.log(chart);
-
-    const option = getChartOption(chart, data, false);
-    return (
-      <div>
-        {
-          <Select defaultValue="default" style={{ width: 120 }} onChange={this.handleChange} >
-            <Option value='default'>请选择图例</Option>
-            <Option value="0">饼状图</Option>
-            <Option value="1">纵向直方图</Option>
-            <Option value="2">典型直方图</Option>
-            <Option value="3">雷达图</Option>
-            <Option value="4">盒型图1</Option>
-            <Option value="5">盒型图2</Option>
-            <Option value="6">复合饼状图</Option>
-            <Option value="7">纵向多种条形图</Option>
-            <Option value="8">横向多种条形图</Option>
-          </Select>
-        }
-        {
+      if (chart.type === "text") {
+      return ( <
+        div > {
           this.renderData()
-        }
-        <ReactEcharts style={{ width: chart.width, height: chart.height, border: '2px solid rgb(217,217,217)' }} option={option} notMerge={true} onEvents={this.onEvents} />
-      </div>
-    )
+        } {
+          getChartText(chart, data)
+        } <
+        /div>
+        )
+    }
+        console.log(chart);
+
+        const option = getChartOption(chart, data, false);
+        return ( <
+      div > {
+            <
+        Select defaultValue="default"
+              style={
+                {
+                  width: 120
+                }
+              }
+              onChange={
+                this.handleChange
+              } >
+              <
+        Option value='default' > 请选择图例 < /Option> <
+        Option value="0" > 饼状图 < /Option> <
+        Option value="1" > 纵向直方图 < /Option> <
+        Option value="2" > 典型直方图 < /Option> <
+        Option value="3" > 雷达图 < /Option> <
+        Option value="4" > 盒型图1 < /Option> <
+        Option value="5" > 盒型图2 < /Option> <
+        Option value="6" > 复合饼状图 < /Option> <
+        Option value="7" > 纵向多种条形图 < /Option> <
+        Option value="8" > 横向多种条形图 < /Option> < /
+        Select >
+      } {
+                                    this.renderData()
+                                  } <
+                                    ReactEcharts style={
+                                      {
+                                        width: chart.width,
+                                        height: chart.height,
+                                        border: '2px solid rgb(217,217,217)'
+                                      }
+                                    }
+                                    option={
+                                      option
+                                    }
+                                    notMerge={
+                                      true
+                                    }
+                                    onEvents={
+                                      this.onEvents
+                                    }
+                                  /> < /
+      div >
+                                  )
   }
 
-  render() {
+                                  render() {
     return this.renderChart(this.props.chart, this.props.data)
   }
 }
 
-export default Chart;
+                                  export default Chart;
